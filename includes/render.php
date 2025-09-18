@@ -63,69 +63,17 @@ function render_sidebar(string $active): void
 
 
 
-function render_footer(bool $includeCharts = false): void
+function render_footer(bool $includeCharts = false, bool $includePlotly = false): void
 {
   echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>';
 
-  if ($includeCharts) {
-    // Plotly CDN
+  if ($includePlotly) {
     echo "\n<script src=\"https://cdn.plot.ly/plotly-2.29.1.min.js\"></script>";
-    // Chart.js CDN
-    echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>";
+  }
 
-    // Chart.js Initialization
-    echo <<<JS
-<script>
-  // Monthly Overview Line Chart
-  const ctx1 = document.getElementById('monthlyOverview').getContext('2d');
-  new Chart(ctx1, {
-    type: 'line',
-    data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-      datasets: [{
-        label: 'Monthly Data',
-        data: [4000, 3000, 2000, 2800, 1900, 2400],
-        borderColor: '#d01f28',
-        backgroundColor: '#d01f28',
-        tension: 0.4,
-        pointBackgroundColor: '#d01f28',
-        pointBorderColor: '#d01f28',
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
-
-  // Device Usage Pie Chart
-  const ctx2 = document.getElementById('deviceUsage').getContext('2d');
-  new Chart(ctx2, {
-    type: 'pie',
-    data: {
-      labels: ['Desktop 65%', 'Mobile 30%', 'Tablet 5%'],
-      datasets: [{
-        data: [65, 30, 5],
-        backgroundColor: ['#e63946', '#d01f28', '#ff7b7b'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'right',
-          labels: { color: '#d01f28', font: { size: 14 } }
-        }
-      }
-    }
-  });
-</script>
-JS;
+  if ($includeCharts) {
+    echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.5/dist/chart.umd.min.js\"></script>";
+    echo "\n<script src=\"assets/js/main.js\"></script>";
   }
 
   echo '</body></html>';

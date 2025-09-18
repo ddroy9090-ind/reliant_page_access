@@ -100,4 +100,4 @@ render_sidebar('home');
 <?php
 echo '</div>';
 echo '</div>';
-render_footer();
+render_footer(true);
