@@ -420,7 +420,20 @@ function format_sources_by_page(array $sourceByPage, int $limit, array $preferre
   $pages = array_slice($pages, 0, $limit);
   $list = [];
   foreach ($pages as $page) {
-    $list[] = ['page' => $page, 'breakdown' => $sourceByPage[$page]];
+    $breakdown = $sourceByPage[$page] ?? [];
+    arsort($breakdown);
+    $sources = [];
+    foreach ($breakdown as $name => $count) {
+      $label = is_string($name) && $name !== '' ? $name : 'Unknown';
+      $sources[] = [
+        'name'   => $label,
+        'visits' => (int)$count,
+      ];
+    }
+    $list[] = [
+      'page'    => $page,
+      'sources' => $sources,
+    ];
   }
   return $list;
 }

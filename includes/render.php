@@ -456,6 +456,26 @@ function render_analytics_script(array $initialState): void
     dom.alert.classList.add('d-none');
   }
 
+  function ensurePlotlyReady(timeout = 10000) {
+    if (window.Plotly) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+      const start = Date.now();
+      const timer = setInterval(() => {
+        if (window.Plotly) {
+          clearInterval(timer);
+          resolve();
+          return;
+        }
+        if (Date.now() - start >= timeout) {
+          clearInterval(timer);
+          reject(new Error('Plotly failed to load'));
+        }
+      }, 50);
+    });
+  }
+
   function setLoading(flag) {
     state.loading = flag;
     if (dom.loading) {
@@ -495,9 +515,17 @@ function render_analytics_script(array $initialState): void
           showAlert(data.error, 'danger');
           return;
         }
-        renderAnalytics(data);
+        return ensurePlotlyReady().then(() => {
+          try {
+            renderAnalytics(data);
+          } catch (err) {
+            console.error('[ANALYTICS_RENDER]', err);
+            showAlert('Unable to render analytics data. Please check the console for details.', 'danger');
+          }
+        });
       })
-      .catch(() => {
+      .catch(err => {
+        console.error('[ANALYTICS_LOAD]', err);
         showAlert('Unable to load analytics data. Please try again later.', 'danger');
       })
       .finally(() => setLoading(false));
@@ -676,7 +704,7 @@ function render_analytics_script(array $initialState): void
     if (sources.length) {
       const pages = sources.map(item => item.page);
       const sourceNames = sources.reduce((acc, item) => {
-        item.sources.forEach(src => {
+        (item.sources || []).forEach(src => {
           if (!acc.includes(src.name)) acc.push(src.name);
         });
         return acc;
@@ -686,7 +714,7 @@ function render_analytics_script(array $initialState): void
         type: 'bar',
         x: pages,
         y: sources.map(item => {
-          const found = item.sources.find(src => src.name === source);
+          const found = (item.sources || []).find(src => src.name === source);
           return found ? found.visits : 0;
         })
       }));
@@ -728,17 +756,34 @@ function render_analytics_script(array $initialState): void
   }
 
   function drawAdvancedCharts(advanced) {
-    const correlation = advanced.correlation || [];
+    const correlation = Array.isArray(advanced.correlation)
+      ? advanced.correlation
+      : (advanced.correlationMatrix && advanced.correlationMatrix.matrix
+        ? advanced.correlationMatrix
+        : []);
     destroyChart('chart-advanced-correlation');
-    if (correlation.length) {
-      const pages = correlation.map(item => item.page);
-      const metrics = ['avg_time', 'bounce_rate', 'exit_rate', 'visits'];
-      const z = metrics.map(metric => correlation.map(item => item[metric] || 0));
+    if (Array.isArray(correlation)) {
+      if (correlation.length) {
+        const pages = correlation.map(item => item.page);
+        const metrics = ['avg_time', 'bounce_rate', 'exit_rate', 'visits'];
+        const z = metrics.map(metric => correlation.map(item => item[metric] || 0));
+        Plotly.newPlot('chart-advanced-correlation', [{
+          type: 'heatmap',
+          z,
+          x: pages,
+          y: metrics
+        }], {
+          margin: { t: 10, r: 20, l: 80, b: 80 }
+        }, { displayModeBar: false });
+      } else if (document.getElementById('chart-advanced-correlation')) {
+        document.getElementById('chart-advanced-correlation').innerHTML = '<p class="text-muted">Not enough data.</p>';
+      }
+    } else if (correlation && correlation.matrix && correlation.labels) {
       Plotly.newPlot('chart-advanced-correlation', [{
         type: 'heatmap',
-        z,
-        x: pages,
-        y: metrics
+        z: correlation.matrix,
+        x: correlation.labels,
+        y: correlation.labels
       }], {
         margin: { t: 10, r: 20, l: 80, b: 80 }
       }, { displayModeBar: false });
