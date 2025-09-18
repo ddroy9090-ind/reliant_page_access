@@ -174,4 +174,4 @@ $initialState = [
 echo '</div>';
 echo '</div>';
 render_analytics_script($initialState);
-render_footer(true);
+render_footer(true, true);
