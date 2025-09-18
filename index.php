@@ -77,7 +77,7 @@ render_sidebar('home');
   <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
     <div>
       <h2 class="title-heading">Dashboard Overview</h2>
-      <p class="text-muted mb-0">Welcome to your ERP system dashboard.</p>
+      <p class="para">Welcome to your ERP system dashboard.</p>
     </div>
     <div class="d-flex flex-wrap gap-2">
       <a class="btn btn-primary" href="page_access_logs.php"><i class="bi bi-list-ul me-1"></i>View Logs</a>
@@ -110,45 +110,88 @@ render_sidebar('home');
         <div class="growth text-success">Last 7 days: <?= number_format($certWeek) ?></div>
       </div>
     </section>
-    <div class="row g-3 charts-section">
-      <div class="col-md-6">
-        <div class="chart-card">
-          <h5 class="fw-semibold mb-3">Monthly Overview</h5>
-          <?php if ($monthlyLabels): ?>
-            <ul class="list-group list-group-flush small">
-              <?php foreach ($monthlyLabels as $index => $label): ?>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  <span><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></span>
-                  <span class="fw-semibold"><?= number_format($monthlyCounts[$index] ?? 0) ?></span>
-                </li>
-              <?php endforeach; ?>
-            </ul>
-          <?php else: ?>
-            <p class="text-muted mb-0">No monthly data available yet.</p>
-          <?php endif; ?>
+
+    <div class="container py-5">
+      <div class="row g-3 charts-section">
+        <div class="col-md-6">
+          <div class="chart-card">
+            <h5 class="fw-semibold mb-3">Monthly Overview</h5>
+            <canvas id="monthlyOverview"></canvas>
+          </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <div class="chart-card">
-          <h5 class="fw-semibold mb-3">Device Usage</h5>
-          <ul class="list-group list-group-flush small">
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span>Desktop</span>
-              <span class="fw-semibold">65%</span>
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span>Mobile</span>
-              <span class="fw-semibold">30%</span>
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span>Tablet</span>
-              <span class="fw-semibold">5%</span>
-            </li>
-          </ul>
-          <p class="text-muted small mb-0">Based on internal traffic estimates.</p>
+        <div class="col-md-6">
+          <div class="chart-card">
+            <h5 class="fw-semibold mb-3">Device Usage</h5>
+            <canvas id="deviceUsage"></canvas>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Chart.js should load BEFORE our script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        // Monthly Overview Line Chart
+        new Chart(document.getElementById('monthlyOverview'), {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+              label: 'Monthly Data',
+              data: [4000, 3000, 2000, 2800, 1900, 2400],
+              borderColor: '#004a44',
+              backgroundColor: '#004a44',
+              tension: 0.4,
+              pointBackgroundColor: '#004a44',
+              pointBorderColor: '#004a44',
+              fill: false
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+
+        // Device Usage Pie Chart
+        new Chart(document.getElementById('deviceUsage'), {
+          type: 'pie',
+          data: {
+            labels: ['Desktop 65%', 'Mobile 30%', 'Tablet 5%'],
+            datasets: [{
+              data: [65, 30, 5],
+              backgroundColor: ['#004a44', '#00796b', '#80cbc4'],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: {
+                  color: '#004a44',
+                  font: {
+                    size: 14
+                  }
+                }
+              }
+            }
+          }
+        });
+      });
+    </script>
+
   <?php endif; ?>
 </main>
 

@@ -20,6 +20,7 @@ function render_head(string $title, string $bodyClass = ''): void
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/custom.css">
+ 
 </head>
 <body{$bodyAttr}>
 HTML;
@@ -66,10 +67,13 @@ function render_sidebar(string $active): void
 function render_footer(bool $includePlotly = false): void
 {
   echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>';
+  echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>';
 
   if ($includePlotly) {
     echo "\n<script src=\"https://cdn.plot.ly/plotly-2.29.1.min.js\"></script>";
   }
+
+
 
   echo '</body></html>';
 }
