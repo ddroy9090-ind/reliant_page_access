@@ -151,10 +151,145 @@ render_sidebar('home');
       </div>
     </section>
 
+    <section class="row g-4 chart-section">
+      <div class="col-12 col-lg-8">
+        <div class="chart-card h-100">
+          <div class="chart-header">
+            <h5 class="mb-1">Monthly page access trend</h5>
+            <p class="chart-subtitle mb-0">Showing the last six months of activity.</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="monthlyTrendChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="chart-card h-100">
+          <div class="chart-header">
+            <h5 class="mb-1">Device distribution</h5>
+            <p class="chart-subtitle mb-0">Breakdown of traffic sources.</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="deviceBreakdownChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
   <?php endif; ?>
 </main>
 
 <?php
 echo '</div>';
 echo '</div>';
-render_footer();
+?>
+
+<?php if (!$error): ?>
+  <script>
+    window.addEventListener('load', () => {
+      if (!window.Chart) {
+        console.warn('Chart.js failed to load.');
+        return;
+      }
+
+      const monthlyLabels = <?= json_encode($monthlyLabels, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+      const monthlyCounts = <?= json_encode($monthlyCounts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+      const deviceLabels = <?= json_encode($deviceChartLabels, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+      const deviceCounts = <?= json_encode($deviceChartCounts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+
+      const primaryColor = '#d01f28';
+      const accentPalette = ['#d01f28', '#e14a51', '#e76c72', '#ed8f93', '#f3b1b4'];
+
+      const monthlyCanvas = document.getElementById('monthlyTrendChart');
+      if (monthlyCanvas) {
+        const ctx = monthlyCanvas.getContext('2d');
+        new window.Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: monthlyLabels,
+            datasets: [{
+              label: 'Page accesses',
+              data: monthlyCounts,
+              borderColor: primaryColor,
+              backgroundColor: 'rgba(208, 31, 40, 0.15)',
+              pointBackgroundColor: primaryColor,
+              pointBorderWidth: 2,
+              tension: 0.35,
+              fill: true,
+              borderWidth: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#1f1f1f',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                padding: 12,
+                borderColor: 'rgba(255, 255, 255, 0.15)',
+                borderWidth: 1
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: '#4b4b4b' },
+                grid: { color: 'rgba(208, 31, 40, 0.08)', drawBorder: false }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { color: '#4b4b4b' },
+                grid: { color: 'rgba(208, 31, 40, 0.05)', drawBorder: false }
+              }
+            }
+          }
+        });
+      }
+
+      const deviceCanvas = document.getElementById('deviceBreakdownChart');
+      if (deviceCanvas) {
+        const ctx = deviceCanvas.getContext('2d');
+        const colors = deviceLabels.map((_, index) => accentPalette[index % accentPalette.length]);
+        new window.Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: deviceLabels,
+            datasets: [{
+              data: deviceCounts,
+              backgroundColor: colors,
+              borderColor: '#ffffff',
+              borderWidth: 2,
+              hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '58%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: '#4b4b4b',
+                  usePointStyle: true,
+                  pointStyle: 'circle'
+                }
+              },
+              tooltip: {
+                backgroundColor: '#1f1f1f',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                padding: 12
+              }
+            }
+          }
+        });
+      }
+    });
+  </script>
+<?php endif; ?>
+
+<?php
+render_footer(false, true);
