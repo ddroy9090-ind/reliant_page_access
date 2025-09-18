@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/analytics.php';
+
 function handle_logs_ajax(PDO $pdo): void
 {
   rl_hit('logs', 120);
