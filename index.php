@@ -75,7 +75,7 @@ try {
   ];
 
   $deviceStmt = $pdo->prepare(
-    'SELECT user_agent, device_type
+    'SELECT user_agent
        FROM page_access_logs
       WHERE accessed_at >= :start AND accessed_at < :end'
   );
