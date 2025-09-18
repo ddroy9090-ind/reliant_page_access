@@ -51,17 +51,3 @@
 .stat-card .growth {
     font-size: 14px;
 }
-
-.charts-section .chart-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    border: 1px solid #eee;
-}
-
-canvas {
-    width: 100% !important;
-    height: 300px !important;
-    /* ✅ ensure visible */
-}
