@@ -63,17 +63,12 @@ function render_sidebar(string $active): void
 
 
 
-function render_footer(bool $includeCharts = false, bool $includePlotly = false): void
+function render_footer(bool $includePlotly = false): void
 {
   echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>';
 
   if ($includePlotly) {
     echo "\n<script src=\"https://cdn.plot.ly/plotly-2.29.1.min.js\"></script>";
-  }
-
-  if ($includeCharts) {
-    echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.5/dist/chart.umd.min.js\"></script>";
-    echo "\n<script src=\"assets/js/main.js\"></script>";
   }
 
   echo '</body></html>';
