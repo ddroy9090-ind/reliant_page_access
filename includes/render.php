@@ -64,12 +64,13 @@ function render_sidebar(string $active): void
 
 
 
-function render_footer(bool $includePlotly = false, bool $includeChartJs = false): void
+function render_footer(bool $includeECharts = false, bool $includeChartJs = false): void
 {
   echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>';
 
-  if ($includePlotly) {
-    echo "\n<script src=\"https://cdn.plot.ly/plotly-2.29.1.min.js\"></script>";
+  if ($includeECharts) {
+    echo "\n<script src=\"https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js\"></script>";
+    echo "\n<script src=\"https://cdn.jsdelivr.net/npm/echarts@5/map/js/world.js\"></script>";
   }
 
   if ($includeChartJs) {
@@ -441,6 +442,13 @@ function render_analytics_script(array $initialState): void
     loading: false
   }, __STATE_JSON__);
 
+  const palette = [
+    '#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+    '#14b8a6', '#f97316', '#6366f1', '#0ea5e9', '#22d3ee'
+  ];
+  const charts = new Map();
+  let resizeHandlerAttached = false;
+
   const dom = {
     start: document.getElementById('start-date'),
     end: document.getElementById('end-date'),
@@ -472,24 +480,69 @@ function render_analytics_script(array $initialState): void
     dom.alert.classList.add('d-none');
   }
 
-  function ensurePlotlyReady(timeout = 10000) {
-    if (window.Plotly) {
-      return Promise.resolve();
+  function ensureEChartsReady(timeout = 10000) {
+    if (window.echarts && typeof window.echarts.init === 'function') {
+      return Promise.resolve(window.echarts);
     }
     return new Promise((resolve, reject) => {
       const start = Date.now();
       const timer = setInterval(() => {
-        if (window.Plotly) {
+        if (window.echarts && typeof window.echarts.init === 'function') {
           clearInterval(timer);
-          resolve();
+          resolve(window.echarts);
           return;
         }
         if (Date.now() - start >= timeout) {
           clearInterval(timer);
-          reject(new Error('Plotly failed to load'));
+          reject(new Error('ECharts failed to load'));
         }
       }, 50);
     });
+  }
+
+  function resizeCharts() {
+    charts.forEach(chart => {
+      if (chart && typeof chart.resize === 'function') {
+        chart.resize();
+      }
+    });
+  }
+
+  function destroyChart(id) {
+    const chart = charts.get(id);
+    if (chart && typeof chart.dispose === 'function') {
+      chart.dispose();
+    }
+    charts.delete(id);
+    const el = document.getElementById(id);
+    if (el) {
+      el.innerHTML = '';
+    }
+  }
+
+  function setNoDataMessage(id, message) {
+    destroyChart(id);
+    const el = document.getElementById(id);
+    if (el) {
+      el.innerHTML = `<p class="text-muted">${message}</p>`;
+    }
+  }
+
+  function initChart(id, option) {
+    const el = document.getElementById(id);
+    if (!el || !window.echarts || typeof window.echarts.init !== 'function') {
+      return null;
+    }
+    destroyChart(id);
+    const chart = window.echarts.init(el);
+    chart.setOption(option);
+    charts.set(id, chart);
+    if (!resizeHandlerAttached) {
+      window.addEventListener('resize', resizeCharts);
+      resizeHandlerAttached = true;
+    }
+    setTimeout(() => chart.resize(), 0);
+    return chart;
   }
 
   function setLoading(flag) {
@@ -503,11 +556,8 @@ function render_analytics_script(array $initialState): void
     if (dom.loadBtn) {
       dom.loadBtn.disabled = flag;
     }
-  }
-
-  function destroyChart(id) {
-    if (window.Plotly && document.getElementById(id)) {
-      Plotly.purge(id);
+    if (!flag) {
+      setTimeout(resizeCharts, 100);
     }
   }
 
@@ -531,7 +581,7 @@ function render_analytics_script(array $initialState): void
           showAlert(data.error, 'danger');
           return;
         }
-        return ensurePlotlyReady().then(() => {
+        return ensureEChartsReady().then(() => {
           try {
             renderAnalytics(data);
           } catch (err) {
@@ -562,213 +612,340 @@ function render_analytics_script(array $initialState): void
   function drawPopularityCharts(popularity) {
     const pages = popularity.pages || [];
     const labels = pages.map(p => p.label || p.page || '');
-    const visits = pages.map(p => p.value || p.visits || 0);
+    const visits = pages.map(p => Number(p.value || p.visits || 0));
 
-    destroyChart('chart-popularity-bar');
-    Plotly.newPlot('chart-popularity-bar', [{
-      type: 'bar',
-      x: visits,
-      y: labels,
-      orientation: 'h',
-      marker: { color: '#1d4ed8' }
-    }], {
-      margin: { t: 10, r: 20, l: 160, b: 40 }
-    }, { displayModeBar: false });
+    if (!labels.length) {
+      setNoDataMessage('chart-popularity-bar', 'No page view data available.');
+      setNoDataMessage('chart-popularity-pie', 'No traffic distribution data available.');
+      setNoDataMessage('chart-popularity-treemap', 'No treemap data available.');
+      return;
+    }
 
-    destroyChart('chart-popularity-pie');
-    Plotly.newPlot('chart-popularity-pie', [{
-      type: 'pie',
-      labels,
-      values: visits,
-      hole: 0.35,
-      textinfo: 'label+percent'
-    }], {
-      margin: { t: 10, b: 10 }
-    }, { displayModeBar: false });
+    initChart('chart-popularity-bar', {
+      color: ['#1d4ed8'],
+      grid: { left: 140, right: 24, top: 20, bottom: 30 },
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      xAxis: { type: 'value', name: 'Visits' },
+      yAxis: { type: 'category', data: labels, inverse: true, axisLabel: { interval: 0 } },
+      series: [{
+        type: 'bar',
+        data: visits,
+        itemStyle: { borderRadius: [0, 6, 6, 0] }
+      }]
+    });
 
-    destroyChart('chart-popularity-treemap');
-    Plotly.newPlot('chart-popularity-treemap', [{
-      type: 'treemap',
-      labels,
-      parents: labels.map(() => ''),
-      values: visits,
-      textinfo: 'label+value'
-    }], {
-      margin: { t: 10, l: 0, r: 0, b: 0 }
-    }, { displayModeBar: false });
+    initChart('chart-popularity-pie', {
+      color: palette,
+      tooltip: { trigger: 'item' },
+      legend: { type: 'scroll', bottom: 0 },
+      series: [{
+        name: 'Visits',
+        type: 'pie',
+        radius: ['40%', '70%'],
+        data: labels.map((label, idx) => ({ value: visits[idx], name: label })),
+        label: { formatter: '{b}: {d}%' }
+      }]
+    });
+
+    initChart('chart-popularity-treemap', {
+      tooltip: {
+        formatter: params => `${params.name}: ${params.value}`
+      },
+      series: [{
+        type: 'treemap',
+        data: labels.map((label, idx) => ({ name: label, value: visits[idx] })),
+        roam: false,
+        leafDepth: 1,
+        label: { formatter: '{b}\n{c}' },
+        breadcrumb: { show: false }
+      }]
+    });
   }
 
   function drawTrafficCharts(traffic) {
-    const dailyTotals = traffic.dailyTotals || [];
-    destroyChart('chart-traffic-line');
-    Plotly.newPlot('chart-traffic-line', [{
-      x: dailyTotals.map(d => d.date),
-      y: dailyTotals.map(d => d.total),
-      type: 'scatter',
-      mode: 'lines+markers',
-      line: { color: '#1d4ed8', width: 3 }
-    }], {
-      margin: { t: 10, r: 20, l: 60, b: 60 },
-      xaxis: { title: 'Date' },
-      yaxis: { title: 'Visits' }
-    }, { displayModeBar: false });
+    const dailyTotals = Array.isArray(traffic.dailyTotals) ? traffic.dailyTotals : [];
+    const perPage = Array.isArray(traffic.perPage) ? traffic.perPage : [];
+    const lineLabels = dailyTotals.map(d => d.date);
+    const lineValues = dailyTotals.map(d => Number(d.total || 0));
 
-    const perPage = traffic.perPage || [];
-    destroyChart('chart-traffic-area');
-    const areaData = perPage.map(page => ({
-      x: page.series.map(p => p.date),
-      y: page.series.map(p => p.visits),
-      stackgroup: 'one',
-      name: page.page,
-      mode: 'lines',
-      line: { width: 0.5 }
-    }));
-    Plotly.newPlot('chart-traffic-area', areaData, {
-      margin: { t: 10, r: 20, l: 60, b: 60 },
-      xaxis: { title: 'Date' },
-      yaxis: { title: 'Visits' }
-    }, { displayModeBar: false });
+    if (!dailyTotals.length) {
+      setNoDataMessage('chart-traffic-line', 'No traffic data available.');
+    } else {
+      initChart('chart-traffic-line', {
+        color: ['#2563eb'],
+        grid: { left: 60, right: 30, top: 20, bottom: 60 },
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', boundaryGap: false, data: lineLabels },
+        yAxis: { type: 'value', name: 'Visits' },
+        series: [{
+          type: 'line',
+          data: lineValues,
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 8,
+          areaStyle: { opacity: 0.1 }
+        }]
+      });
+    }
+
+    const dates = lineLabels.length
+      ? lineLabels
+      : Array.from(new Set(perPage.flatMap(page => page.series.map(point => point.date))));
+    if (!perPage.length || !dates.length) {
+      setNoDataMessage('chart-traffic-area', 'Not enough per-page traffic data.');
+    } else {
+      const areaSeries = perPage.map((page, index) => {
+        const color = palette[index % palette.length];
+        const data = dates.map(date => {
+          const point = (page.series || []).find(item => item.date === date);
+          return Number(point ? point.visits : 0);
+        });
+        return {
+          name: page.page,
+          type: 'line',
+          stack: 'total',
+          smooth: true,
+          areaStyle: { opacity: 0.35 },
+          emphasis: { focus: 'series' },
+          lineStyle: { width: 1.5 },
+          itemStyle: { color },
+          data
+        };
+      });
+
+      initChart('chart-traffic-area', {
+        color: palette,
+        grid: { left: 60, right: 30, top: 20, bottom: 60 },
+        tooltip: { trigger: 'axis' },
+        legend: { top: 0 },
+        xAxis: { type: 'category', boundaryGap: false, data: dates },
+        yAxis: { type: 'value', name: 'Visits' },
+        series: areaSeries
+      });
+    }
   }
 
   function drawEngagementCharts(engagement) {
-    const avgTime = engagement.avgTime || [];
-    destroyChart('chart-engagement-time');
-    Plotly.newPlot('chart-engagement-time', [{
-      type: 'bar',
-      x: avgTime.map(i => i.page || i.label),
-      y: avgTime.map(i => Math.round(i.seconds || i.value || 0)),
-      marker: { color: '#22c55e' }
-    }], {
-      margin: { t: 10, r: 20, l: 50, b: 80 },
-      yaxis: { title: 'Seconds' }
-    }, { displayModeBar: false });
+    const avgTime = Array.isArray(engagement.avgTime) ? engagement.avgTime : [];
+    if (!avgTime.length) {
+      setNoDataMessage('chart-engagement-time', 'No average time data available.');
+    } else {
+      initChart('chart-engagement-time', {
+        color: ['#22c55e'],
+        grid: { left: 60, right: 30, top: 20, bottom: 80 },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        xAxis: { type: 'category', data: avgTime.map(i => i.page || i.label) },
+        yAxis: { type: 'value', name: 'Seconds' },
+        series: [{
+          type: 'bar',
+          data: avgTime.map(i => Math.round(Number(i.seconds || i.value || 0))),
+          itemStyle: { borderRadius: [6, 6, 0, 0] }
+        }]
+      });
+    }
 
-    const bounce = engagement.bounceRate || [];
-    destroyChart('chart-engagement-bounce');
-    Plotly.newPlot('chart-engagement-bounce', [{
-      type: 'bar',
-      x: bounce.map(i => i.page || i.label),
-      y: bounce.map(i => Math.round((i.rate || i.value || 0) * 100)),
-      marker: { color: '#f97316' }
-    }], {
-      margin: { t: 10, r: 20, l: 50, b: 80 },
-      yaxis: { title: 'Bounce %' }
-    }, { displayModeBar: false });
+    const bounce = Array.isArray(engagement.bounceRate) ? engagement.bounceRate : [];
+    if (!bounce.length) {
+      setNoDataMessage('chart-engagement-bounce', 'No bounce rate data available.');
+    } else {
+      initChart('chart-engagement-bounce', {
+        color: ['#f97316'],
+        grid: { left: 60, right: 30, top: 20, bottom: 80 },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          valueFormatter: value => `${value}%`
+        },
+        xAxis: { type: 'category', data: bounce.map(i => i.page || i.label) },
+        yAxis: { type: 'value', name: 'Bounce %' },
+        series: [{
+          type: 'bar',
+          data: bounce.map(i => Math.round(Number(i.rate || i.value || 0) * 100)),
+          itemStyle: { borderRadius: [6, 6, 0, 0] }
+        }]
+      });
+    }
 
-    const exits = engagement.exitPages || [];
-    destroyChart('chart-engagement-exit');
-    Plotly.newPlot('chart-engagement-exit', [{
-      type: 'bar',
-      x: exits.map(i => i.count || i.value),
-      y: exits.map(i => i.page || i.label),
-      orientation: 'h',
-      marker: { color: '#a855f7' }
-    }], {
-      margin: { t: 10, r: 20, l: 160, b: 40 },
-      xaxis: { title: 'Sessions ending here' }
-    }, { displayModeBar: false });
+    const exits = Array.isArray(engagement.exitPages) ? engagement.exitPages : [];
+    if (!exits.length) {
+      setNoDataMessage('chart-engagement-exit', 'No exit page data available.');
+    } else {
+      initChart('chart-engagement-exit', {
+        color: ['#8b5cf6'],
+        grid: { left: 180, right: 30, top: 20, bottom: 40 },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        xAxis: { type: 'value', name: 'Sessions ending here' },
+        yAxis: { type: 'category', inverse: true, data: exits.map(i => i.page || i.label) },
+        series: [{
+          type: 'bar',
+          data: exits.map(i => Number(i.count || i.value)),
+          itemStyle: { borderRadius: [0, 6, 6, 0] }
+        }]
+      });
+    }
   }
 
   function drawNavigationCharts(navigation) {
     const sankey = navigation.sankey || { nodes: [], links: [] };
-    destroyChart('chart-navigation-sankey');
-    if ((sankey.nodes || []).length && (sankey.links || []).length) {
-      Plotly.newPlot('chart-navigation-sankey', [{
-        type: 'sankey',
-        node: { label: sankey.nodes },
-        link: {
-          source: sankey.links.map(l => l.source),
-          target: sankey.links.map(l => l.target),
-          value: sankey.links.map(l => l.value)
-        }
-      }], {
-        margin: { t: 10, l: 30, r: 30, b: 10 }
-      }, { displayModeBar: false });
-    } else if (document.getElementById('chart-navigation-sankey')) {
-      document.getElementById('chart-navigation-sankey').innerHTML = '<p class="text-muted">Not enough navigation data.</p>';
+    const sankeyNodes = Array.isArray(sankey.nodes) ? sankey.nodes.map(name => ({ name })) : [];
+    const sankeyLinks = Array.isArray(sankey.links)
+      ? sankey.links.map(link => ({
+        source: sankey.nodes && sankey.nodes[link.source] ? sankey.nodes[link.source] : link.source,
+        target: sankey.nodes && sankey.nodes[link.target] ? sankey.nodes[link.target] : link.target,
+        value: Number(link.value || 0)
+      })).filter(link => link.source !== undefined && link.target !== undefined)
+      : [];
+
+    if (!sankeyNodes.length || !sankeyLinks.length) {
+      setNoDataMessage('chart-navigation-sankey', 'Not enough navigation data.');
+    } else {
+      initChart('chart-navigation-sankey', {
+        tooltip: { trigger: 'item', triggerOn: 'mousemove' },
+        series: [{
+          type: 'sankey',
+          data: sankeyNodes,
+          links: sankeyLinks,
+          emphasis: { focus: 'adjacency' },
+          lineStyle: { color: 'source', curveness: 0.5 }
+        }]
+      });
     }
 
     const funnel = navigation.funnel || { steps: [] };
-    destroyChart('chart-navigation-funnel');
-    if ((funnel.steps || []).length) {
-      Plotly.newPlot('chart-navigation-funnel', [{
-        type: 'funnel',
-        y: funnel.steps.map(s => s.label),
-        x: funnel.steps.map(s => s.value)
-      }], {
-        margin: { t: 10, l: 150, r: 40, b: 40 }
-      }, { displayModeBar: false });
-    } else if (document.getElementById('chart-navigation-funnel')) {
-      document.getElementById('chart-navigation-funnel').innerHTML = '<p class="text-muted">Not enough funnel data.</p>';
+    const steps = Array.isArray(funnel.steps) ? funnel.steps : [];
+    if (!steps.length) {
+      setNoDataMessage('chart-navigation-funnel', 'Not enough funnel data.');
+    } else {
+      initChart('chart-navigation-funnel', {
+        color: palette,
+        tooltip: { trigger: 'item', formatter: params => `${params.name}: ${params.value}` },
+        legend: { show: false },
+        series: [{
+          type: 'funnel',
+          sort: 'descending',
+          gap: 4,
+          label: { formatter: '{b}: {c}' },
+          data: steps.map(step => ({ name: step.label, value: Number(step.value || 0) }))
+        }]
+      });
     }
   }
 
   function drawDeviceCharts(devicesSources) {
-    const devices = devicesSources.devices || [];
-    destroyChart('chart-device-donut');
-    Plotly.newPlot('chart-device-donut', [{
-      type: 'pie',
-      labels: devices.map(i => i.device || i.label),
-      values: devices.map(i => i.visits || i.value || 0),
-      hole: 0.35
-    }], {
-      margin: { t: 10, b: 10 }
-    }, { displayModeBar: false });
+    const devices = Array.isArray(devicesSources.devices) ? devicesSources.devices : [];
+    if (!devices.length) {
+      setNoDataMessage('chart-device-donut', 'No device data available.');
+    } else {
+      initChart('chart-device-donut', {
+        color: palette,
+        tooltip: { trigger: 'item' },
+        legend: { bottom: 0 },
+        series: [{
+          name: 'Visits',
+          type: 'pie',
+          radius: ['45%', '70%'],
+          avoidLabelOverlap: false,
+          data: devices.map(device => ({
+            value: Number(device.visits || device.value || 0),
+            name: device.device || device.label
+          })),
+          label: { formatter: '{b}: {d}%' }
+        }]
+      });
+    }
 
-    const sources = devicesSources.sourcesByPage || [];
-    destroyChart('chart-source-stacked');
-    if (sources.length) {
+    const sources = Array.isArray(devicesSources.sourcesByPage) ? devicesSources.sourcesByPage : [];
+    if (!sources.length) {
+      setNoDataMessage('chart-source-stacked', 'Not enough referral data.');
+    } else {
       const pages = sources.map(item => item.page);
       const sourceNames = sources.reduce((acc, item) => {
         (item.sources || []).forEach(src => {
-          if (!acc.includes(src.name)) acc.push(src.name);
+          const name = src.name || 'Unknown';
+          if (!acc.includes(name)) {
+            acc.push(name);
+          }
         });
         return acc;
       }, []);
-      const traces = sourceNames.map(source => ({
-        name: source,
+      const stackedSeries = sourceNames.map((sourceName, index) => ({
+        name: sourceName,
         type: 'bar',
-        x: pages,
-        y: sources.map(item => {
-          const found = (item.sources || []).find(src => src.name === source);
-          return found ? found.visits : 0;
+        stack: 'total',
+        emphasis: { focus: 'series' },
+        itemStyle: { color: palette[index % palette.length] },
+        data: pages.map(page => {
+          const pageEntry = sources.find(item => item.page === page);
+          if (!pageEntry) return 0;
+          const entry = (pageEntry.sources || []).find(src => (src.name || 'Unknown') === sourceName);
+          return Number(entry ? entry.visits : 0);
         })
       }));
-      Plotly.newPlot('chart-source-stacked', traces, {
-        barmode: 'stack',
-        margin: { t: 10, r: 20, l: 60, b: 80 },
-        xaxis: { title: 'Page' },
-        yaxis: { title: 'Visits' }
-      }, { displayModeBar: false });
-    } else if (document.getElementById('chart-source-stacked')) {
-      document.getElementById('chart-source-stacked').innerHTML = '<p class="text-muted">Not enough referral data.</p>';
+
+      initChart('chart-source-stacked', {
+        grid: { left: 70, right: 30, top: 40, bottom: 80 },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: { top: 0 },
+        xAxis: { type: 'category', data: pages },
+        yAxis: { type: 'value', name: 'Visits' },
+        series: stackedSeries
+      });
     }
   }
 
   function drawGeoCharts(geography) {
-    const countries = geography.countries || [];
-    destroyChart('chart-geo-heat');
-    Plotly.newPlot('chart-geo-heat', [{
-      type: 'choropleth',
-      locations: countries.map(i => i.country || i.label),
-      locationmode: 'country names',
-      z: countries.map(i => i.count || i.value || 0),
-      colorscale: 'Blues'
-    }], {
-      margin: { t: 10, r: 0, l: 0, b: 0 }
-    }, { displayModeBar: false });
+    const countries = Array.isArray(geography.countries) ? geography.countries : [];
+    if (!countries.length || !window.echarts || !window.echarts.getMap || !window.echarts.getMap('world')) {
+      setNoDataMessage('chart-geo-heat', 'No geographic data available.');
+    } else {
+      const heatData = countries.map(item => ({
+        name: item.country || item.label,
+        value: Number(item.count || item.value || 0)
+      }));
+      const values = heatData.map(item => item.value);
+      const max = values.reduce((acc, value) => Math.max(acc, value), 0);
 
-    const regions = geography.regions || [];
-    destroyChart('chart-geo-bar');
-    Plotly.newPlot('chart-geo-bar', [{
-      type: 'bar',
-      x: regions.map(i => i.count || i.value || 0),
-      y: regions.map(i => i.region || i.label),
-      orientation: 'h',
-      marker: { color: '#0ea5e9' }
-    }], {
-      margin: { t: 10, r: 20, l: 160, b: 40 }
-    }, { displayModeBar: false });
+      initChart('chart-geo-heat', {
+        tooltip: { trigger: 'item' },
+        visualMap: {
+          min: 0,
+          max: max || 1,
+          left: 'left',
+          bottom: 0,
+          text: ['High', 'Low'],
+          calculable: true
+        },
+        series: [{
+          type: 'map',
+          map: 'world',
+          roam: true,
+          emphasis: { label: { show: false } },
+          data: heatData
+        }]
+      });
+    }
+
+    const regions = Array.isArray(geography.regions) ? geography.regions : [];
+    if (!regions.length) {
+      setNoDataMessage('chart-geo-bar', 'No regional data available.');
+    } else {
+      initChart('chart-geo-bar', {
+        color: ['#0ea5e9'],
+        grid: { left: 160, right: 30, top: 20, bottom: 40 },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        xAxis: { type: 'value', name: 'Visits' },
+        yAxis: {
+          type: 'category',
+          inverse: true,
+          data: regions.map(region => region.region || region.label)
+        },
+        series: [{
+          type: 'bar',
+          data: regions.map(region => Number(region.count || region.value || 0)),
+          itemStyle: { borderRadius: [0, 6, 6, 0] }
+        }]
+      });
+    }
   }
 
   function drawAdvancedCharts(advanced) {
@@ -777,56 +954,152 @@ function render_analytics_script(array $initialState): void
       : (advanced.correlationMatrix && advanced.correlationMatrix.matrix
         ? advanced.correlationMatrix
         : []);
-    destroyChart('chart-advanced-correlation');
+
     if (Array.isArray(correlation)) {
-      if (correlation.length) {
+      if (!correlation.length) {
+        setNoDataMessage('chart-advanced-correlation', 'Not enough correlation data.');
+      } else {
+        const metrics = [
+          { key: 'avg_time', label: 'Avg Time' },
+          { key: 'bounce_rate', label: 'Bounce Rate' },
+          { key: 'exit_rate', label: 'Exit Rate' },
+          { key: 'visits', label: 'Visits' }
+        ];
         const pages = correlation.map(item => item.page);
-        const metrics = ['avg_time', 'bounce_rate', 'exit_rate', 'visits'];
-        const z = metrics.map(metric => correlation.map(item => item[metric] || 0));
-        Plotly.newPlot('chart-advanced-correlation', [{
-          type: 'heatmap',
-          z,
-          x: pages,
-          y: metrics
-        }], {
-          margin: { t: 10, r: 20, l: 80, b: 80 }
-        }, { displayModeBar: false });
-      } else if (document.getElementById('chart-advanced-correlation')) {
-        document.getElementById('chart-advanced-correlation').innerHTML = '<p class="text-muted">Not enough data.</p>';
+        const heatData = [];
+        metrics.forEach((metric, row) => {
+          correlation.forEach((item, col) => {
+            const raw = item[metric.key];
+            const value = typeof raw === 'number' ? raw : Number(raw || 0);
+            heatData.push([col, row, value]);
+          });
+        });
+        const values = heatData.map(entry => entry[2]);
+        const max = values.reduce((acc, value) => Math.max(acc, value), 0);
+
+        initChart('chart-advanced-correlation', {
+          tooltip: {
+            position: 'top',
+            formatter: params => {
+              const metric = metrics[params.data[1]];
+              const page = pages[params.data[0]];
+              return `${metric.label} • ${page}: ${params.data[2]}`;
+            }
+          },
+          grid: { left: 90, right: 30, top: 20, bottom: 90 },
+          xAxis: { type: 'category', data: pages, axisLabel: { rotate: 30 } },
+          yAxis: { type: 'category', data: metrics.map(metric => metric.label) },
+          visualMap: {
+            min: 0,
+            max: max || 1,
+            calculable: true,
+            orient: 'horizontal',
+            left: 'center',
+            bottom: 20
+          },
+          series: [{
+            type: 'heatmap',
+            data: heatData,
+            label: {
+              show: true,
+              formatter: params => {
+                const value = params.data[2];
+                return typeof value === 'number' ? value.toFixed(1) : value;
+              }
+            }
+          }]
+        });
       }
-    } else if (correlation && correlation.matrix && correlation.labels) {
-      Plotly.newPlot('chart-advanced-correlation', [{
-        type: 'heatmap',
-        z: correlation.matrix,
-        x: correlation.labels,
-        y: correlation.labels
-      }], {
-        margin: { t: 10, r: 20, l: 80, b: 80 }
-      }, { displayModeBar: false });
-    } else if (document.getElementById('chart-advanced-correlation')) {
-      document.getElementById('chart-advanced-correlation').innerHTML = '<p class="text-muted">Not enough data.</p>';
+    } else if (correlation && Array.isArray(correlation.matrix) && Array.isArray(correlation.labels)) {
+      const matrix = correlation.matrix;
+      const labels = correlation.labels;
+      const heatData = [];
+      matrix.forEach((row, rowIndex) => {
+        row.forEach((value, colIndex) => {
+          heatData.push([colIndex, rowIndex, Number(value || 0)]);
+        });
+      });
+
+      initChart('chart-advanced-correlation', {
+        tooltip: {
+          position: 'top',
+          formatter: params => {
+            const row = labels[params.data[1]] || '';
+            const col = labels[params.data[0]] || '';
+            return `${row} ↔ ${col}: ${params.data[2].toFixed(2)}`;
+          }
+        },
+        grid: { left: 90, right: 30, top: 20, bottom: 90 },
+        xAxis: { type: 'category', data: labels, axisLabel: { rotate: 30 } },
+        yAxis: { type: 'category', data: labels },
+        visualMap: {
+          min: -1,
+          max: 1,
+          calculable: true,
+          orient: 'horizontal',
+          left: 'center',
+          bottom: 20
+        },
+        series: [{
+          type: 'heatmap',
+          data: heatData,
+          label: { show: true, formatter: params => params.data[2].toFixed(2) }
+        }]
+      });
+    } else {
+      setNoDataMessage('chart-advanced-correlation', 'Not enough correlation data.');
     }
 
-    const scatter = advanced.scatter || [];
-    destroyChart('chart-advanced-scatter');
-    Plotly.newPlot('chart-advanced-scatter', [{
-      mode: 'markers',
-      type: 'scatter',
-      x: scatter.map(point => point.visits || 0),
-      y: scatter.map(point => point.avg_time || 0),
-      text: scatter.map(point => point.page),
-      marker: {
-        size: scatter.map(point => (point.bounce_rate || 0) * 60 + 8),
-        color: scatter.map(point => point.exit_rate || 0),
-        colorscale: 'Turbo',
-        showscale: true,
-        colorbar: { title: 'Exit Rate' }
-      }
-    }], {
-      margin: { t: 10, r: 20, l: 80, b: 80 },
-      xaxis: { title: 'Visits' },
-      yaxis: { title: 'Avg time on page (s)' }
-    }, { displayModeBar: false });
+    const scatter = Array.isArray(advanced.scatter) ? advanced.scatter : [];
+    if (!scatter.length) {
+      setNoDataMessage('chart-advanced-scatter', 'Not enough engagement data for scatter plot.');
+    } else {
+      const scatterData = scatter.map(point => ([
+        Number(point.visits || 0),
+        Number(point.avg_time || 0),
+        Number(point.bounce_rate || 0),
+        Number(point.exit_rate || 0),
+        point.page || ''
+      ]));
+      const exitValues = scatterData.map(item => item[3]);
+      const exitMax = exitValues.reduce((acc, value) => Math.max(acc, value), 0);
+
+      initChart('chart-advanced-scatter', {
+        grid: { left: 80, right: 60, top: 20, bottom: 80 },
+        tooltip: {
+          formatter: params => {
+            const value = params.value;
+            const bounce = (value[2] * 100).toFixed(1);
+            const exit = (value[3] * 100).toFixed(1);
+            return `${value[4]}<br/>Visits: ${value[0]}<br/>Avg time: ${value[1].toFixed(1)}s<br/>Bounce: ${bounce}%<br/>Exit: ${exit}%`;
+          }
+        },
+        xAxis: { name: 'Visits' },
+        yAxis: { name: 'Avg time on page (s)' },
+        visualMap: {
+          type: 'continuous',
+          min: 0,
+          max: exitMax || 0.1,
+          dimension: 3,
+          right: 0,
+          top: 20,
+          text: ['High exit', 'Low exit'],
+          inRange: { color: ['#22c55e', '#ef4444'] }
+        },
+        series: [{
+          type: 'scatter',
+          data: scatterData,
+          symbolSize: value => (value[2] * 60) + 8,
+          emphasis: { focus: 'series' },
+          encode: { x: 0, y: 1 },
+          itemStyle: {
+            shadowBlur: 10,
+            shadowColor: 'rgba(0,0,0,0.15)',
+            shadowOffsetY: 5
+          }
+        }]
+      });
+    }
   }
 
   if (dom.loadBtn) {
