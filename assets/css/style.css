@@ -127,6 +127,12 @@ body {
   height: 320px;
 }
 
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
 .chart-container.large {
   height: 380px;
 }

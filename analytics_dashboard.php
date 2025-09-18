@@ -65,15 +65,15 @@ render_sidebar('analytics');
       <div class="analytics-grid two-col">
         <div class="chart-card">
           <h5>Visits per page (Top 15)</h5>
-          <div id="chart-popularity-bar" class="chart-container"></div>
+          <div id="chart-popularity-bar" class="chart-container"><canvas></canvas></div>
         </div>
         <div class="chart-card">
           <h5>Traffic distribution</h5>
-          <div id="chart-popularity-pie" class="chart-container"></div>
+          <div id="chart-popularity-pie" class="chart-container"><canvas></canvas></div>
         </div>
         <div class="chart-card">
           <h5>Treemap view</h5>
-          <div id="chart-popularity-treemap" class="chart-container"></div>
+          <div id="chart-popularity-treemap" class="chart-container"><canvas></canvas></div>
         </div>
       </div>
     </section>
@@ -83,11 +83,11 @@ render_sidebar('analytics');
       <div class="analytics-grid two-col">
         <div class="chart-card">
           <h5>Daily trend</h5>
-          <div id="chart-traffic-line" class="chart-container large"></div>
+          <div id="chart-traffic-line" class="chart-container large"><canvas></canvas></div>
         </div>
         <div class="chart-card">
           <h5>Page contribution over time</h5>
-          <div id="chart-traffic-area" class="chart-container large"></div>
+          <div id="chart-traffic-area" class="chart-container large"><canvas></canvas></div>
         </div>
       </div>
     </section>
@@ -97,15 +97,15 @@ render_sidebar('analytics');
       <div class="analytics-grid two-col">
         <div class="chart-card">
           <h5>Average time on page</h5>
-          <div id="chart-engagement-time" class="chart-container"></div>
+          <div id="chart-engagement-time" class="chart-container"><canvas></canvas></div>
         </div>
         <div class="chart-card">
           <h5>Bounce rate</h5>
-          <div id="chart-engagement-bounce" class="chart-container"></div>
+          <div id="chart-engagement-bounce" class="chart-container"><canvas></canvas></div>
         </div>
         <div class="chart-card">
           <h5>Exit pages</h5>
-          <div id="chart-engagement-exit" class="chart-container"></div>
+          <div id="chart-engagement-exit" class="chart-container"><canvas></canvas></div>
         </div>
       </div>
     </section>
@@ -115,11 +115,11 @@ render_sidebar('analytics');
       <div class="analytics-grid two-col">
         <div class="chart-card">
           <h5>Sankey diagram</h5>
-          <div id="chart-navigation-sankey" class="chart-container large"></div>
+          <div id="chart-navigation-sankey" class="chart-container large"><canvas></canvas></div>
         </div>
         <div class="chart-card">
           <h5>Funnel progression</h5>
-          <div id="chart-navigation-funnel" class="chart-container large"></div>
+          <div id="chart-navigation-funnel" class="chart-container large"><canvas></canvas></div>
         </div>
       </div>
     </section>
@@ -129,11 +129,11 @@ render_sidebar('analytics');
       <div class="analytics-grid two-col">
         <div class="chart-card">
           <h5>Traffic by device</h5>
-          <div id="chart-device-donut" class="chart-container"></div>
+          <div id="chart-device-donut" class="chart-container"><canvas></canvas></div>
         </div>
         <div class="chart-card">
           <h5>Visits by source</h5>
-          <div id="chart-source-stacked" class="chart-container"></div>
+          <div id="chart-source-stacked" class="chart-container"><canvas></canvas></div>
         </div>
       </div>
     </section>
@@ -143,11 +143,11 @@ render_sidebar('analytics');
       <div class="analytics-grid two-col">
         <div class="chart-card">
           <h5>Heat map</h5>
-          <div id="chart-geo-heat" class="chart-container large"></div>
+          <div id="chart-geo-heat" class="chart-container large"><canvas></canvas></div>
         </div>
         <div class="chart-card">
           <h5>Top regions</h5>
-          <div id="chart-geo-bar" class="chart-container"></div>
+          <div id="chart-geo-bar" class="chart-container"><canvas></canvas></div>
         </div>
       </div>
     </section>
@@ -157,11 +157,11 @@ render_sidebar('analytics');
       <div class="analytics-grid two-col">
         <div class="chart-card">
           <h5>Correlation matrix</h5>
-          <div id="chart-advanced-correlation" class="chart-container"></div>
+          <div id="chart-advanced-correlation" class="chart-container"><canvas></canvas></div>
         </div>
         <div class="chart-card">
           <h5>Engagement scatter</h5>
-          <div id="chart-advanced-scatter" class="chart-container"></div>
+          <div id="chart-advanced-scatter" class="chart-container"><canvas></canvas></div>
         </div>
       </div>
     </section>
@@ -175,4 +175,4 @@ $initialState = [
 echo '</div>';
 echo '</div>';
 render_analytics_script($initialState);
-render_footer(true);
+render_footer(false, true, true);

@@ -64,7 +64,7 @@ function render_sidebar(string $active): void
 
 
 
-function render_footer(bool $includeECharts = false, bool $includeChartJs = false): void
+function render_footer(bool $includeECharts = false, bool $includeChartJs = false, bool $includeChartJsExtras = false): void
 {
   echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>';
 
@@ -75,6 +75,15 @@ function render_footer(bool $includeECharts = false, bool $includeChartJs = fals
 
   if ($includeChartJs) {
     echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js\"></script>";
+    if ($includeChartJsExtras) {
+      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js\"></script>";
+      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@4/dist/chartjs-chart-treemap.min.js\"></script>";
+      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-sankey@4/dist/chartjs-chart-sankey.min.js\"></script>";
+      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-funnel@4/dist/chartjs-chart-funnel.min.js\"></script>";
+      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2/dist/chartjs-chart-matrix.min.js\"></script>";
+      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js\"></script>";
+      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4/dist/chartjs-chart-geo.min.js\"></script>";
+    }
   }
 
 
@@ -448,6 +457,42 @@ function render_analytics_script(array $initialState): void
   ];
   const charts = new Map();
   let resizeHandlerAttached = false;
+  let defaultsRegistered = false;
+  let worldGeoPromise = null;
+
+  const matrixValuePlugin = {
+    id: 'matrixValuePlugin',
+    afterDatasetsDraw(chart) {
+      const options = chart.options?.plugins?.matrixValue || {};
+      if (options.display === false) {
+        return;
+      }
+      const dataset = chart.data.datasets?.[0];
+      if (!dataset) {
+        return;
+      }
+      const meta = chart.getDatasetMeta(0);
+      const ctx = chart.ctx;
+      const fontSize = options.fontSize || 12;
+      const fontFamily = options.fontFamily || "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      const decimals = typeof options.decimals === 'number' ? options.decimals : 1;
+      const color = options.color || '#0f172a';
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${fontSize}px ${fontFamily}`;
+      meta.data.forEach((element, index) => {
+        const raw = dataset.data?.[index];
+        if (!raw || typeof raw.v !== 'number') {
+          return;
+        }
+        const text = raw.v.toFixed(decimals);
+        ctx.fillText(text, element.x, element.y);
+      });
+      ctx.restore();
+    }
+  };
 
   const dom = {
     start: document.getElementById('start-date'),
@@ -480,24 +525,136 @@ function render_analytics_script(array $initialState): void
     dom.alert.classList.add('d-none');
   }
 
-  function ensureEChartsReady(timeout = 10000) {
-    if (window.echarts && typeof window.echarts.init === 'function') {
-      return Promise.resolve(window.echarts);
+  function registerNamespace(ns) {
+    if (!window.Chart || !ns) return;
+    Object.values(ns).forEach(entry => {
+      if (!entry) return;
+      try {
+        window.Chart.register(entry);
+      } catch (err) {
+        /* ignore */
+      }
+    });
+  }
+
+  function registerChartDefaults() {
+    if (defaultsRegistered || !window.Chart) {
+      return;
+    }
+    defaultsRegistered = true;
+    const Chart = window.Chart;
+    Chart.defaults.color = '#1f2937';
+    Chart.defaults.font.family = "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.boxWidth = 10;
+    Chart.defaults.plugins.tooltip.backgroundColor = '#0f172a';
+    Chart.defaults.plugins.tooltip.titleColor = '#ffffff';
+    Chart.defaults.plugins.tooltip.bodyColor = '#ffffff';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 6;
+    Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.responsive = true;
+
+    registerNamespace(window.ChartTreemap);
+    registerNamespace(window.ChartSankey);
+    registerNamespace(window.ChartFunnel);
+    registerNamespace(window.ChartMatrix);
+    registerNamespace(window.ChartGeo);
+    if (window.ChartDataLabels) {
+      try {
+        Chart.register(window.ChartDataLabels);
+      } catch (err) {
+        /* ignore */
+      }
+    }
+  }
+
+  function ensureChartJsReady(timeout = 10000) {
+    if (window.Chart) {
+      registerChartDefaults();
+      return Promise.resolve(window.Chart);
     }
     return new Promise((resolve, reject) => {
       const start = Date.now();
       const timer = setInterval(() => {
-        if (window.echarts && typeof window.echarts.init === 'function') {
+        if (window.Chart) {
           clearInterval(timer);
-          resolve(window.echarts);
+          registerChartDefaults();
+          resolve(window.Chart);
           return;
         }
         if (Date.now() - start >= timeout) {
           clearInterval(timer);
-          reject(new Error('ECharts failed to load'));
+          reject(new Error('Chart.js failed to load'));
         }
       }, 50);
     });
+  }
+
+  function getContainer(id) {
+    return document.getElementById(id);
+  }
+
+  function getCanvas(id) {
+    const container = getContainer(id);
+    if (!container) {
+      return null;
+    }
+    let canvas = container.querySelector('canvas');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      container.innerHTML = '';
+      container.appendChild(canvas);
+    }
+    return canvas;
+  }
+
+  function destroyChart(id) {
+    const chart = charts.get(id);
+    if (chart && typeof chart.destroy === 'function') {
+      chart.destroy();
+    }
+    charts.delete(id);
+  }
+
+  function setNoDataMessage(id, message) {
+    destroyChart(id);
+    const container = getContainer(id);
+    if (container) {
+      container.innerHTML = `<p class="text-muted text-center small mb-0">${message}</p>`;
+    }
+  }
+
+  function hasChartType(type) {
+    const Chart = window.Chart;
+    if (!Chart || !Chart.registry || typeof Chart.registry.getController !== 'function') {
+      return false;
+    }
+    try {
+      return !!Chart.registry.getController(type);
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function initChart(id, config) {
+    if (!window.Chart) {
+      return null;
+    }
+    destroyChart(id);
+    const canvas = getCanvas(id);
+    if (!canvas) {
+      return null;
+    }
+    const ctx = canvas.getContext('2d');
+    const chart = new window.Chart(ctx, config);
+    charts.set(id, chart);
+    if (!resizeHandlerAttached) {
+      window.addEventListener('resize', resizeCharts);
+      resizeHandlerAttached = true;
+    }
+    return chart;
   }
 
   function resizeCharts() {
@@ -506,43 +663,6 @@ function render_analytics_script(array $initialState): void
         chart.resize();
       }
     });
-  }
-
-  function destroyChart(id) {
-    const chart = charts.get(id);
-    if (chart && typeof chart.dispose === 'function') {
-      chart.dispose();
-    }
-    charts.delete(id);
-    const el = document.getElementById(id);
-    if (el) {
-      el.innerHTML = '';
-    }
-  }
-
-  function setNoDataMessage(id, message) {
-    destroyChart(id);
-    const el = document.getElementById(id);
-    if (el) {
-      el.innerHTML = `<p class="text-muted">${message}</p>`;
-    }
-  }
-
-  function initChart(id, option) {
-    const el = document.getElementById(id);
-    if (!el || !window.echarts || typeof window.echarts.init !== 'function') {
-      return null;
-    }
-    destroyChart(id);
-    const chart = window.echarts.init(el);
-    chart.setOption(option);
-    charts.set(id, chart);
-    if (!resizeHandlerAttached) {
-      window.addEventListener('resize', resizeCharts);
-      resizeHandlerAttached = true;
-    }
-    setTimeout(() => chart.resize(), 0);
-    return chart;
   }
 
   function setLoading(flag) {
@@ -559,6 +679,64 @@ function render_analytics_script(array $initialState): void
     if (!flag) {
       setTimeout(resizeCharts, 100);
     }
+  }
+
+  function hexToRgba(hex, alpha) {
+    const cleaned = hex.replace('#', '');
+    if (cleaned.length !== 6) {
+      return hex;
+    }
+    const bigint = parseInt(cleaned, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  function mixColors(colorA, colorB, amount) {
+    const parse = color => {
+      const hex = color.replace('#', '');
+      return [
+        parseInt(hex.substring(0, 2), 16),
+        parseInt(hex.substring(2, 4), 16),
+        parseInt(hex.substring(4, 6), 16)
+      ];
+    };
+    const [r1, g1, b1] = parse(colorA);
+    const [r2, g2, b2] = parse(colorB);
+    const blend = (a, b) => Math.round(a + (b - a) * amount);
+    return `rgb(${blend(r1, r2)}, ${blend(g1, g2)}, ${blend(b1, b2)})`;
+  }
+
+  function getWorldFeatures() {
+    if (worldGeoPromise) {
+      return worldGeoPromise;
+    }
+    if (!window.fetch || !window.ChartGeo || !window.ChartGeo.topojson) {
+      worldGeoPromise = Promise.resolve(null);
+      return worldGeoPromise;
+    }
+    const url = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json';
+    worldGeoPromise = fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load world map data');
+        }
+        return response.json();
+      })
+      .then(topology => {
+        try {
+          return window.ChartGeo.topojson.feature(topology, topology.objects.countries).features;
+        } catch (err) {
+          console.error('[ANALYTICS_GEO_PARSE]', err);
+          return null;
+        }
+      })
+      .catch(err => {
+        console.error('[ANALYTICS_GEO_FETCH]', err);
+        return null;
+      });
+    return worldGeoPromise;
   }
 
   function loadAnalytics() {
@@ -581,7 +759,7 @@ function render_analytics_script(array $initialState): void
           showAlert(data.error, 'danger');
           return;
         }
-        return ensureEChartsReady().then(() => {
+        return ensureChartJsReady().then(() => {
           try {
             renderAnalytics(data);
           } catch (err) {
@@ -610,9 +788,10 @@ function render_analytics_script(array $initialState): void
   }
 
   function drawPopularityCharts(popularity) {
-    const pages = popularity.pages || [];
+    const pages = Array.isArray(popularity.pages) ? popularity.pages : [];
     const labels = pages.map(p => p.label || p.page || '');
     const visits = pages.map(p => Number(p.value || p.visits || 0));
+    const totalVisits = visits.reduce((sum, value) => sum + value, 0);
 
     if (!labels.length) {
       setNoDataMessage('chart-popularity-bar', 'No page view data available.');
@@ -622,44 +801,110 @@ function render_analytics_script(array $initialState): void
     }
 
     initChart('chart-popularity-bar', {
-      color: ['#1d4ed8'],
-      grid: { left: 140, right: 24, top: 20, bottom: 30 },
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-      xAxis: { type: 'value', name: 'Visits' },
-      yAxis: { type: 'category', data: labels, inverse: true, axisLabel: { interval: 0 } },
-      series: [{
-        type: 'bar',
-        data: visits,
-        itemStyle: { borderRadius: [0, 6, 6, 0] }
-      }]
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Visits',
+          data: visits,
+          backgroundColor: '#1d4ed8',
+          borderRadius: 8,
+          maxBarThickness: 24
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            beginAtZero: true,
+            title: { display: true, text: 'Visits' },
+            grid: { color: 'rgba(37, 99, 235, 0.08)' }
+          },
+          y: {
+            ticks: { autoSkip: false },
+            grid: { display: false }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.formattedValue} visits`
+            }
+          }
+        }
+      }
     });
 
     initChart('chart-popularity-pie', {
-      color: palette,
-      tooltip: { trigger: 'item' },
-      legend: { type: 'scroll', bottom: 0 },
-      series: [{
-        name: 'Visits',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        data: labels.map((label, idx) => ({ value: visits[idx], name: label })),
-        label: { formatter: '{b}: {d}%' }
-      }]
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: visits,
+          backgroundColor: labels.map((_, idx) => palette[idx % palette.length]),
+          borderWidth: 0
+        }]
+      },
+      options: {
+        cutout: '45%',
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: context => {
+                const value = typeof context.parsed === 'number' ? context.parsed : Number(context.parsed || 0);
+                const percent = totalVisits ? ((value / totalVisits) * 100).toFixed(1) : '0.0';
+                return `${context.label}: ${context.formattedValue} (${percent}%)`;
+              }
+            }
+          }
+        }
+      }
     });
 
-    initChart('chart-popularity-treemap', {
-      tooltip: {
-        formatter: params => `${params.name}: ${params.value}`
-      },
-      series: [{
+    if (!hasChartType('treemap')) {
+      setNoDataMessage('chart-popularity-treemap', 'Treemap chart type is unavailable.');
+    } else {
+      initChart('chart-popularity-treemap', {
         type: 'treemap',
-        data: labels.map((label, idx) => ({ name: label, value: visits[idx] })),
-        roam: false,
-        leafDepth: 1,
-        label: { formatter: '{b}\n{c}' },
-        breadcrumb: { show: false }
-      }]
-    });
+        data: {
+          datasets: [{
+            tree: labels.map((label, idx) => ({ label, value: visits[idx] })),
+            key: 'value',
+            groups: ['label'],
+            spacing: 1,
+            borderWidth: 1,
+            borderColor: '#ffffff',
+            backgroundColor(context) {
+              const index = context.dataIndex ?? 0;
+              return palette[index % palette.length];
+            },
+            labels: {
+              display: true,
+              formatter(ctx) {
+                const name = ctx.raw.g || '';
+                const value = typeof ctx.raw.v === 'number' ? ctx.raw.v : 0;
+                return `${name}
+${value}`;
+              }
+            }
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: items => items?.[0]?.raw?.g || '',
+                label: item => `${item.raw?.v ?? 0} visits`
+              }
+            }
+          }
+        }
+      });
+    }
   }
 
   function drawTrafficCharts(traffic) {
@@ -672,25 +917,34 @@ function render_analytics_script(array $initialState): void
       setNoDataMessage('chart-traffic-line', 'No traffic data available.');
     } else {
       initChart('chart-traffic-line', {
-        color: ['#2563eb'],
-        grid: { left: 60, right: 30, top: 20, bottom: 60 },
-        tooltip: { trigger: 'axis' },
-        xAxis: { type: 'category', boundaryGap: false, data: lineLabels },
-        yAxis: { type: 'value', name: 'Visits' },
-        series: [{
-          type: 'line',
-          data: lineValues,
-          smooth: true,
-          symbol: 'circle',
-          symbolSize: 8,
-          areaStyle: { opacity: 0.1 }
-        }]
+        type: 'line',
+        data: {
+          labels: lineLabels,
+          datasets: [{
+            label: 'Visits',
+            data: lineValues,
+            tension: 0.4,
+            fill: true,
+            borderColor: '#2563eb',
+            backgroundColor: hexToRgba('#2563eb', 0.15),
+            pointRadius: 3,
+            pointHoverRadius: 5
+          }]
+        },
+        options: {
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: 'Date' } },
+            y: { beginAtZero: true, title: { display: true, text: 'Visits' } }
+          }
+        }
       });
     }
 
     const dates = lineLabels.length
       ? lineLabels
-      : Array.from(new Set(perPage.flatMap(page => page.series.map(point => point.date))));
+      : Array.from(new Set(perPage.flatMap(page => page.series?.map(point => point.date) || [])));
     if (!perPage.length || !dates.length) {
       setNoDataMessage('chart-traffic-area', 'Not enough per-page traffic data.');
     } else {
@@ -701,26 +955,29 @@ function render_analytics_script(array $initialState): void
           return Number(point ? point.visits : 0);
         });
         return {
-          name: page.page,
-          type: 'line',
-          stack: 'total',
-          smooth: true,
-          areaStyle: { opacity: 0.35 },
-          emphasis: { focus: 'series' },
-          lineStyle: { width: 1.5 },
-          itemStyle: { color },
-          data
+          label: page.page,
+          data,
+          fill: true,
+          tension: 0.35,
+          stack: 'traffic',
+          borderColor: color,
+          backgroundColor: hexToRgba(color, 0.35),
+          pointRadius: 0,
+          pointHoverRadius: 3
         };
       });
 
       initChart('chart-traffic-area', {
-        color: palette,
-        grid: { left: 60, right: 30, top: 20, bottom: 60 },
-        tooltip: { trigger: 'axis' },
-        legend: { top: 0 },
-        xAxis: { type: 'category', boundaryGap: false, data: dates },
-        yAxis: { type: 'value', name: 'Visits' },
-        series: areaSeries
+        type: 'line',
+        data: { labels: dates, datasets: areaSeries },
+        options: {
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { position: 'bottom' } },
+          scales: {
+            x: { title: { display: true, text: 'Date' } },
+            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Visits' } }
+          }
+        }
       });
     }
   }
@@ -731,16 +988,24 @@ function render_analytics_script(array $initialState): void
       setNoDataMessage('chart-engagement-time', 'No average time data available.');
     } else {
       initChart('chart-engagement-time', {
-        color: ['#22c55e'],
-        grid: { left: 60, right: 30, top: 20, bottom: 80 },
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        xAxis: { type: 'category', data: avgTime.map(i => i.page || i.label) },
-        yAxis: { type: 'value', name: 'Seconds' },
-        series: [{
-          type: 'bar',
-          data: avgTime.map(i => Math.round(Number(i.seconds || i.value || 0))),
-          itemStyle: { borderRadius: [6, 6, 0, 0] }
-        }]
+        type: 'bar',
+        data: {
+          labels: avgTime.map(i => i.page || i.label),
+          datasets: [{
+            label: 'Seconds',
+            data: avgTime.map(i => Math.round(Number(i.seconds || i.value || 0))),
+            backgroundColor: '#22c55e',
+            borderRadius: 10,
+            maxBarThickness: 36
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { autoSkip: false }, grid: { display: false } },
+            y: { beginAtZero: true, title: { display: true, text: 'Seconds' } }
+          }
+        }
       });
     }
 
@@ -749,20 +1014,29 @@ function render_analytics_script(array $initialState): void
       setNoDataMessage('chart-engagement-bounce', 'No bounce rate data available.');
     } else {
       initChart('chart-engagement-bounce', {
-        color: ['#f97316'],
-        grid: { left: 60, right: 30, top: 20, bottom: 80 },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'shadow' },
-          valueFormatter: value => `${value}%`
+        type: 'bar',
+        data: {
+          labels: bounce.map(i => i.page || i.label),
+          datasets: [{
+            label: 'Bounce %',
+            data: bounce.map(i => Math.round(Number(i.rate || i.value || 0) * 100)),
+            backgroundColor: '#f97316',
+            borderRadius: 10,
+            maxBarThickness: 36
+          }]
         },
-        xAxis: { type: 'category', data: bounce.map(i => i.page || i.label) },
-        yAxis: { type: 'value', name: 'Bounce %' },
-        series: [{
-          type: 'bar',
-          data: bounce.map(i => Math.round(Number(i.rate || i.value || 0) * 100)),
-          itemStyle: { borderRadius: [6, 6, 0, 0] }
-        }]
+        options: {
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: context => `${context.formattedValue}%` }
+            }
+          },
+          scales: {
+            x: { ticks: { autoSkip: false }, grid: { display: false } },
+            y: { beginAtZero: true, title: { display: true, text: 'Bounce %' } }
+          }
+        }
       });
     }
 
@@ -771,43 +1045,68 @@ function render_analytics_script(array $initialState): void
       setNoDataMessage('chart-engagement-exit', 'No exit page data available.');
     } else {
       initChart('chart-engagement-exit', {
-        color: ['#8b5cf6'],
-        grid: { left: 180, right: 30, top: 20, bottom: 40 },
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        xAxis: { type: 'value', name: 'Sessions ending here' },
-        yAxis: { type: 'category', inverse: true, data: exits.map(i => i.page || i.label) },
-        series: [{
-          type: 'bar',
-          data: exits.map(i => Number(i.count || i.value)),
-          itemStyle: { borderRadius: [0, 6, 6, 0] }
-        }]
+        type: 'bar',
+        data: {
+          labels: exits.map(i => i.page || i.label),
+          datasets: [{
+            label: 'Sessions ending here',
+            data: exits.map(i => Number(i.count || i.value || 0)),
+            backgroundColor: '#8b5cf6',
+            borderRadius: 10,
+            maxBarThickness: 24
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, title: { display: true, text: 'Sessions' } },
+            y: { ticks: { autoSkip: false }, grid: { display: false } }
+          }
+        }
       });
     }
   }
 
   function drawNavigationCharts(navigation) {
     const sankey = navigation.sankey || { nodes: [], links: [] };
-    const sankeyNodes = Array.isArray(sankey.nodes) ? sankey.nodes.map(name => ({ name })) : [];
-    const sankeyLinks = Array.isArray(sankey.links)
-      ? sankey.links.map(link => ({
-        source: sankey.nodes && sankey.nodes[link.source] ? sankey.nodes[link.source] : link.source,
-        target: sankey.nodes && sankey.nodes[link.target] ? sankey.nodes[link.target] : link.target,
-        value: Number(link.value || 0)
-      })).filter(link => link.source !== undefined && link.target !== undefined)
-      : [];
+    const sankeyNodes = Array.isArray(sankey.nodes) ? sankey.nodes : [];
+    const sankeyLinks = Array.isArray(sankey.links) ? sankey.links : [];
 
-    if (!sankeyNodes.length || !sankeyLinks.length) {
+    const nodeLabels = sankeyNodes.map(node => (typeof node === 'string' ? node : String(node ?? '')));
+    const sankeyData = sankeyLinks.map(link => {
+      const flow = Number(link.value || 0);
+      const source = typeof link.source === 'number' ? nodeLabels[link.source] : link.source;
+      const target = typeof link.target === 'number' ? nodeLabels[link.target] : link.target;
+      return { from: source, to: target, flow };
+    }).filter(item => item.flow > 0 && item.from && item.to);
+
+    if (!sankeyData.length) {
       setNoDataMessage('chart-navigation-sankey', 'Not enough navigation data.');
+    } else if (!hasChartType('sankey')) {
+      setNoDataMessage('chart-navigation-sankey', 'Sankey chart type is unavailable.');
     } else {
       initChart('chart-navigation-sankey', {
-        tooltip: { trigger: 'item', triggerOn: 'mousemove' },
-        series: [{
-          type: 'sankey',
-          data: sankeyNodes,
-          links: sankeyLinks,
-          emphasis: { focus: 'adjacency' },
-          lineStyle: { color: 'source', curveness: 0.5 }
-        }]
+        type: 'sankey',
+        data: {
+          datasets: [{
+            data: sankeyData,
+            colorFrom: context => palette[context.dataIndex % palette.length],
+            colorTo: context => palette[(context.dataIndex + 1) % palette.length],
+            colorMode: 'gradient',
+            borderWidth: 0
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: context => `${context.raw.from} → ${context.raw.to}: ${context.raw.flow}`
+              }
+            }
+          }
+        }
       });
     }
 
@@ -815,18 +1114,28 @@ function render_analytics_script(array $initialState): void
     const steps = Array.isArray(funnel.steps) ? funnel.steps : [];
     if (!steps.length) {
       setNoDataMessage('chart-navigation-funnel', 'Not enough funnel data.');
+    } else if (!hasChartType('funnel')) {
+      setNoDataMessage('chart-navigation-funnel', 'Funnel chart type is unavailable.');
     } else {
       initChart('chart-navigation-funnel', {
-        color: palette,
-        tooltip: { trigger: 'item', formatter: params => `${params.name}: ${params.value}` },
-        legend: { show: false },
-        series: [{
-          type: 'funnel',
-          sort: 'descending',
-          gap: 4,
-          label: { formatter: '{b}: {c}' },
-          data: steps.map(step => ({ name: step.label, value: Number(step.value || 0) }))
-        }]
+        type: 'funnel',
+        data: {
+          labels: steps.map(step => step.label || step.name || ''),
+          datasets: [{
+            data: steps.map(step => Number(step.value || 0)),
+            backgroundColor: steps.map((_, idx) => palette[idx % palette.length])
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: context => `${context.label}: ${context.formattedValue}`
+              }
+            }
+          }
+        }
       });
     }
   }
@@ -837,20 +1146,19 @@ function render_analytics_script(array $initialState): void
       setNoDataMessage('chart-device-donut', 'No device data available.');
     } else {
       initChart('chart-device-donut', {
-        color: palette,
-        tooltip: { trigger: 'item' },
-        legend: { bottom: 0 },
-        series: [{
-          name: 'Visits',
-          type: 'pie',
-          radius: ['45%', '70%'],
-          avoidLabelOverlap: false,
-          data: devices.map(device => ({
-            value: Number(device.visits || device.value || 0),
-            name: device.device || device.label
-          })),
-          label: { formatter: '{b}: {d}%' }
-        }]
+        type: 'doughnut',
+        data: {
+          labels: devices.map(device => device.device || device.label),
+          datasets: [{
+            data: devices.map(device => Number(device.visits || device.value || 0)),
+            backgroundColor: devices.map((_, idx) => palette[idx % palette.length]),
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '55%',
+          plugins: { legend: { position: 'bottom' } }
+        }
       });
     }
 
@@ -868,60 +1176,84 @@ function render_analytics_script(array $initialState): void
         });
         return acc;
       }, []);
-      const stackedSeries = sourceNames.map((sourceName, index) => ({
-        name: sourceName,
-        type: 'bar',
-        stack: 'total',
-        emphasis: { focus: 'series' },
-        itemStyle: { color: palette[index % palette.length] },
+      const stackedDatasets = sourceNames.map((name, index) => ({
+        label: name,
         data: pages.map(page => {
           const pageEntry = sources.find(item => item.page === page);
-          if (!pageEntry) return 0;
-          const entry = (pageEntry.sources || []).find(src => (src.name || 'Unknown') === sourceName);
+          const entry = pageEntry ? (pageEntry.sources || []).find(src => (src.name || 'Unknown') === name) : null;
           return Number(entry ? entry.visits : 0);
-        })
+        }),
+        backgroundColor: palette[index % palette.length],
+        stack: 'sources'
       }));
 
       initChart('chart-source-stacked', {
-        grid: { left: 70, right: 30, top: 40, bottom: 80 },
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        legend: { top: 0 },
-        xAxis: { type: 'category', data: pages },
-        yAxis: { type: 'value', name: 'Visits' },
-        series: stackedSeries
+        type: 'bar',
+        data: { labels: pages, datasets: stackedDatasets },
+        options: {
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { position: 'bottom' } },
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Visits' } }
+          }
+        }
       });
     }
   }
 
   function drawGeoCharts(geography) {
     const countries = Array.isArray(geography.countries) ? geography.countries : [];
-    if (!countries.length || !window.echarts || !window.echarts.getMap || !window.echarts.getMap('world')) {
+    if (!countries.length) {
       setNoDataMessage('chart-geo-heat', 'No geographic data available.');
+    } else if (!hasChartType('choropleth')) {
+      setNoDataMessage('chart-geo-heat', 'Geo chart type is unavailable.');
     } else {
-      const heatData = countries.map(item => ({
-        name: item.country || item.label,
-        value: Number(item.count || item.value || 0)
-      }));
-      const values = heatData.map(item => item.value);
-      const max = values.reduce((acc, value) => Math.max(acc, value), 0);
-
-      initChart('chart-geo-heat', {
-        tooltip: { trigger: 'item' },
-        visualMap: {
-          min: 0,
-          max: max || 1,
-          left: 'left',
-          bottom: 0,
-          text: ['High', 'Low'],
-          calculable: true
-        },
-        series: [{
-          type: 'map',
-          map: 'world',
-          roam: true,
-          emphasis: { label: { show: false } },
-          data: heatData
-        }]
+      const countryMap = new Map();
+      countries.forEach(item => {
+        const key = String(item.country || item.label || '').toLowerCase();
+        if (key) {
+          countryMap.set(key, Number(item.count || item.value || 0));
+        }
+      });
+      getWorldFeatures().then(features => {
+        if (!features || !features.length) {
+          setNoDataMessage('chart-geo-heat', 'Unable to load map data.');
+          return;
+        }
+        const datasetData = features.map(feature => {
+          const name = String(feature.properties?.name || '').toLowerCase();
+          const value = countryMap.get(name) || 0;
+          return { feature, value };
+        });
+        const values = datasetData.map(item => item.value);
+        const max = values.reduce((acc, value) => Math.max(acc, value), 0);
+        initChart('chart-geo-heat', {
+          type: 'choropleth',
+          data: {
+            labels: datasetData.map(item => item.feature.properties?.name || ''),
+            datasets: [{
+              label: 'Visits',
+              outline: features,
+              data: datasetData
+            }]
+          },
+          options: {
+            scales: {
+              projection: { axis: 'x', projection: 'equalEarth' },
+              color: { axis: 'y', min: 0, max: max || 1, quantize: 6 }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: items => items?.[0]?.label || '',
+                  label: item => `${item.raw?.value ?? 0} visits`
+                }
+              }
+            }
+          }
+        });
       });
     }
 
@@ -930,121 +1262,177 @@ function render_analytics_script(array $initialState): void
       setNoDataMessage('chart-geo-bar', 'No regional data available.');
     } else {
       initChart('chart-geo-bar', {
-        color: ['#0ea5e9'],
-        grid: { left: 160, right: 30, top: 20, bottom: 40 },
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        xAxis: { type: 'value', name: 'Visits' },
-        yAxis: {
-          type: 'category',
-          inverse: true,
-          data: regions.map(region => region.region || region.label)
+        type: 'bar',
+        data: {
+          labels: regions.map(region => region.region || region.label),
+          datasets: [{
+            label: 'Visits',
+            data: regions.map(region => Number(region.count || region.value || 0)),
+            backgroundColor: '#0ea5e9',
+            borderRadius: 10,
+            maxBarThickness: 24
+          }]
         },
-        series: [{
-          type: 'bar',
-          data: regions.map(region => Number(region.count || region.value || 0)),
-          itemStyle: { borderRadius: [0, 6, 6, 0] }
-        }]
+        options: {
+          indexAxis: 'y',
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, title: { display: true, text: 'Visits' } },
+            y: { ticks: { autoSkip: false }, grid: { display: false } }
+          }
+        }
       });
     }
   }
 
   function drawAdvancedCharts(advanced) {
-    const correlation = Array.isArray(advanced.correlation)
+    const correlationRaw = Array.isArray(advanced.correlation)
       ? advanced.correlation
-      : (advanced.correlationMatrix && advanced.correlationMatrix.matrix
-        ? advanced.correlationMatrix
-        : []);
+      : (advanced.correlationMatrix && advanced.correlationMatrix.matrix ? advanced.correlationMatrix : null);
+    const matrixAvailable = hasChartType('matrix');
 
-    if (Array.isArray(correlation)) {
-      if (!correlation.length) {
-        setNoDataMessage('chart-advanced-correlation', 'Not enough correlation data.');
-      } else {
-        const metrics = [
-          { key: 'avg_time', label: 'Avg Time' },
-          { key: 'bounce_rate', label: 'Bounce Rate' },
-          { key: 'exit_rate', label: 'Exit Rate' },
-          { key: 'visits', label: 'Visits' }
-        ];
-        const pages = correlation.map(item => item.page);
-        const heatData = [];
+    if (Array.isArray(correlationRaw) && correlationRaw.length) {
+      const metrics = [
+        { key: 'avg_time', label: 'Avg Time' },
+        { key: 'bounce_rate', label: 'Bounce Rate' },
+        { key: 'exit_rate', label: 'Exit Rate' },
+        { key: 'visits', label: 'Visits' }
+      ];
+      const pages = correlationRaw.map(item => item.page || '');
+      const matrixData = [];
+      correlationRaw.forEach((item, col) => {
         metrics.forEach((metric, row) => {
-          correlation.forEach((item, col) => {
-            const raw = item[metric.key];
-            const value = typeof raw === 'number' ? raw : Number(raw || 0);
-            heatData.push([col, row, value]);
-          });
-        });
-        const values = heatData.map(entry => entry[2]);
-        const max = values.reduce((acc, value) => Math.max(acc, value), 0);
-
-        initChart('chart-advanced-correlation', {
-          tooltip: {
-            position: 'top',
-            formatter: params => {
-              const metric = metrics[params.data[1]];
-              const page = pages[params.data[0]];
-              return `${metric.label} • ${page}: ${params.data[2]}`;
-            }
-          },
-          grid: { left: 90, right: 30, top: 20, bottom: 90 },
-          xAxis: { type: 'category', data: pages, axisLabel: { rotate: 30 } },
-          yAxis: { type: 'category', data: metrics.map(metric => metric.label) },
-          visualMap: {
-            min: 0,
-            max: max || 1,
-            calculable: true,
-            orient: 'horizontal',
-            left: 'center',
-            bottom: 20
-          },
-          series: [{
-            type: 'heatmap',
-            data: heatData,
-            label: {
-              show: true,
-              formatter: params => {
-                const value = params.data[2];
-                return typeof value === 'number' ? value.toFixed(1) : value;
-              }
-            }
-          }]
-        });
-      }
-    } else if (correlation && Array.isArray(correlation.matrix) && Array.isArray(correlation.labels)) {
-      const matrix = correlation.matrix;
-      const labels = correlation.labels;
-      const heatData = [];
-      matrix.forEach((row, rowIndex) => {
-        row.forEach((value, colIndex) => {
-          heatData.push([colIndex, rowIndex, Number(value || 0)]);
+          const raw = item[metric.key];
+          const value = typeof raw === 'number' ? raw : Number(raw || 0);
+          matrixData.push({ x: pages[col], y: metric.label, v: value });
         });
       });
-
+      const values = matrixData.map(entry => entry.v);
+      const min = values.reduce((acc, value) => Math.min(acc, value), values[0] ?? 0);
+      const max = values.reduce((acc, value) => Math.max(acc, value), values[0] ?? 0);
       initChart('chart-advanced-correlation', {
-        tooltip: {
-          position: 'top',
-          formatter: params => {
-            const row = labels[params.data[1]] || '';
-            const col = labels[params.data[0]] || '';
-            return `${row} ↔ ${col}: ${params.data[2].toFixed(2)}`;
+        type: matrixAvailable ? 'matrix' : 'bar',
+        data: matrixAvailable ? {
+          datasets: [{
+            label: 'Correlation',
+            data: matrixData,
+            backgroundColor: ctx => {
+              const value = ctx.raw?.v ?? 0;
+              const ratio = max === min ? 0.5 : (value - min) / (max - min);
+              return mixColors('#bfdbfe', '#1d4ed8', ratio);
+            },
+            borderWidth: 1,
+            borderColor: '#ffffff',
+            width: ctx => {
+              const chart = ctx.chart;
+              return chart.chartArea ? chart.chartArea.width / pages.length - 6 : 20;
+            },
+            height: ctx => {
+              const chart = ctx.chart;
+              return chart.chartArea ? chart.chartArea.height / metrics.length - 6 : 20;
+            }
+          }]
+        } : {
+          labels: metrics.map(metric => metric.label),
+          datasets: pages.map((page, idx) => ({
+            label: page,
+            data: metrics.map(metric => {
+              const entry = correlationRaw[idx];
+              const raw = entry ? entry[metric.key] : 0;
+              return typeof raw === 'number' ? raw : Number(raw || 0);
+            }),
+            backgroundColor: hexToRgba(palette[idx % palette.length], 0.6)
+          }))
+        },
+        options: {
+          plugins: {
+            legend: { position: matrixAvailable ? 'bottom' : 'top' },
+            tooltip: matrixAvailable ? {
+              callbacks: {
+                title: items => {
+                  const item = items?.[0];
+                  return item ? `${item.raw?.y} • ${item.raw?.x}` : '';
+                },
+                label: item => `${item.raw?.v ?? 0}`
+              }
+            } : undefined,
+            matrixValue: matrixAvailable ? { decimals: 1 } : undefined
+          },
+          scales: matrixAvailable ? {
+            x: { type: 'category', labels: pages, offset: true },
+            y: { type: 'category', labels: metrics.map(metric => metric.label), offset: true }
+          } : {
+            x: { stacked: true },
+            y: { stacked: true, beginAtZero: true }
           }
         },
-        grid: { left: 90, right: 30, top: 20, bottom: 90 },
-        xAxis: { type: 'category', data: labels, axisLabel: { rotate: 30 } },
-        yAxis: { type: 'category', data: labels },
-        visualMap: {
-          min: -1,
-          max: 1,
-          calculable: true,
-          orient: 'horizontal',
-          left: 'center',
-          bottom: 20
+        plugins: matrixAvailable ? [matrixValuePlugin] : []
+      });
+    } else if (correlationRaw && Array.isArray(correlationRaw.matrix) && Array.isArray(correlationRaw.labels)) {
+      const matrix = correlationRaw.matrix;
+      const labels = correlationRaw.labels;
+      const data = [];
+      matrix.forEach((row, rowIndex) => {
+        row.forEach((value, colIndex) => {
+          data.push({ x: labels[colIndex], y: labels[rowIndex], v: Number(value || 0) });
+        });
+      });
+      const values = data.map(entry => entry.v);
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      initChart('chart-advanced-correlation', {
+        type: matrixAvailable ? 'matrix' : 'bar',
+        data: matrixAvailable ? {
+          datasets: [{
+            label: 'Correlation',
+            data,
+            backgroundColor: ctx => {
+              const value = ctx.raw?.v ?? 0;
+              const ratio = max === min ? 0.5 : (value - min) / (max - min);
+              return mixColors('#fed7aa', '#ea580c', ratio);
+            },
+            borderWidth: 1,
+            borderColor: '#ffffff',
+            width: ctx => {
+              const chart = ctx.chart;
+              return chart.chartArea ? chart.chartArea.width / labels.length - 6 : 20;
+            },
+            height: ctx => {
+              const chart = ctx.chart;
+              return chart.chartArea ? chart.chartArea.height / labels.length - 6 : 20;
+            }
+          }]
+        } : {
+          labels,
+          datasets: matrix.map((row, rowIndex) => ({
+            label: labels[rowIndex] || `Series ${rowIndex + 1}`,
+            data: row.map(value => Number(value || 0)),
+            backgroundColor: hexToRgba(palette[rowIndex % palette.length], 0.6)
+          }))
         },
-        series: [{
-          type: 'heatmap',
-          data: heatData,
-          label: { show: true, formatter: params => params.data[2].toFixed(2) }
-        }]
+        options: {
+          plugins: {
+            legend: { position: matrixAvailable ? 'bottom' : 'top' },
+            tooltip: matrixAvailable ? {
+              callbacks: {
+                title: items => {
+                  const item = items?.[0];
+                  return item ? `${item.raw?.y} ↔ ${item.raw?.x}` : '';
+                },
+                label: item => `${Number(item.raw?.v ?? 0).toFixed(2)}`
+              }
+            } : undefined,
+            matrixValue: matrixAvailable ? { decimals: 2 } : undefined
+          },
+          scales: matrixAvailable ? {
+            x: { type: 'category', labels, offset: true },
+            y: { type: 'category', labels, offset: true }
+          } : {
+            x: { beginAtZero: true },
+            y: { beginAtZero: true }
+          }
+        },
+        plugins: matrixAvailable ? [matrixValuePlugin] : []
       });
     } else {
       setNoDataMessage('chart-advanced-correlation', 'Not enough correlation data.');
@@ -1054,50 +1442,58 @@ function render_analytics_script(array $initialState): void
     if (!scatter.length) {
       setNoDataMessage('chart-advanced-scatter', 'Not enough engagement data for scatter plot.');
     } else {
-      const scatterData = scatter.map(point => ([
-        Number(point.visits || 0),
-        Number(point.avg_time || 0),
-        Number(point.bounce_rate || 0),
-        Number(point.exit_rate || 0),
-        point.page || ''
-      ]));
-      const exitValues = scatterData.map(item => item[3]);
+      const scatterData = scatter.map(point => ({
+        x: Number(point.visits || 0),
+        y: Number(point.avg_time || 0),
+        bounce: Number(point.bounce_rate || 0),
+        exit: Number(point.exit_rate || 0),
+        label: point.page || ''
+      }));
+      const exitValues = scatterData.map(item => item.exit);
       const exitMax = exitValues.reduce((acc, value) => Math.max(acc, value), 0);
-
       initChart('chart-advanced-scatter', {
-        grid: { left: 80, right: 60, top: 20, bottom: 80 },
-        tooltip: {
-          formatter: params => {
-            const value = params.value;
-            const bounce = (value[2] * 100).toFixed(1);
-            const exit = (value[3] * 100).toFixed(1);
-            return `${value[4]}<br/>Visits: ${value[0]}<br/>Avg time: ${value[1].toFixed(1)}s<br/>Bounce: ${bounce}%<br/>Exit: ${exit}%`;
-          }
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: 'Pages',
+            data: scatterData,
+            parsing: false,
+            pointRadius: ctx => {
+              const bounce = ctx.raw?.bounce ?? 0;
+              return Math.max(6, bounce * 60);
+            },
+            pointHoverRadius: ctx => {
+              const bounce = ctx.raw?.bounce ?? 0;
+              return Math.max(8, bounce * 70);
+            },
+            backgroundColor: ctx => {
+              const exit = ctx.raw?.exit ?? 0;
+              const ratio = exitMax ? Math.min(exit / exitMax, 1) : 0;
+              return mixColors('#22c55e', '#ef4444', ratio);
+            },
+            borderColor: '#ffffff',
+            borderWidth: 1.5
+          }]
         },
-        xAxis: { name: 'Visits' },
-        yAxis: { name: 'Avg time on page (s)' },
-        visualMap: {
-          type: 'continuous',
-          min: 0,
-          max: exitMax || 0.1,
-          dimension: 3,
-          right: 0,
-          top: 20,
-          text: ['High exit', 'Low exit'],
-          inRange: { color: ['#22c55e', '#ef4444'] }
-        },
-        series: [{
-          type: 'scatter',
-          data: scatterData,
-          symbolSize: value => (value[2] * 60) + 8,
-          emphasis: { focus: 'series' },
-          encode: { x: 0, y: 1 },
-          itemStyle: {
-            shadowBlur: 10,
-            shadowColor: 'rgba(0,0,0,0.15)',
-            shadowOffsetY: 5
+        options: {
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: context => {
+                  const value = context.raw || {};
+                  const bounce = (value.bounce * 100).toFixed(1);
+                  const exit = (value.exit * 100).toFixed(1);
+                  return [`${value.label}`, `Visits: ${value.x}`, `Avg time: ${value.y.toFixed(1)}s`, `Bounce: ${bounce}%`, `Exit: ${exit}%`];
+                }
+              }
+            }
+          },
+          scales: {
+            x: { title: { display: true, text: 'Visits' } },
+            y: { title: { display: true, text: 'Avg time on page (s)' } }
           }
-        }]
+        }
       });
     }
   }
@@ -1117,3 +1513,4 @@ function render_analytics_script(array $initialState): void
 JS;
   echo str_replace('__STATE_JSON__', $stateJson, $script);
 }
+
