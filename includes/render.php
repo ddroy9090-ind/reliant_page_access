@@ -19,17 +19,20 @@ function render_head(string $title, string $bodyClass = ''): void
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/custom.css">
 </head>
 <body{$bodyAttr}>
 HTML;
 }
 
+
+
 function render_sidebar(string $active): void
 {
   $csrf = htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8');
   $items = [
-    'home'      => ['href' => 'index.php', 'icon' => 'bi-speedometer2',     'label' => 'Overview'],
-    'logs'      => ['href' => 'page_access_logs.php', 'icon' => 'bi-file-text',       'label' => 'Page Access Logs'],
+    'home'      => ['href' => 'index.php', 'icon' => 'bi-house',     'label' => 'Dashboard'],
+    'logs'      => ['href' => 'page_access_logs.php', 'icon' => 'bi-universal-access-circle',       'label' => 'Page Access Logs'],
     'analytics' => ['href' => 'analytics_dashboard.php', 'icon' => 'bi-graph-up-arrow', 'label' => 'Analytics Dashboard'],
   ];
 
@@ -53,19 +56,81 @@ function render_sidebar(string $active): void
     printf('<a href="%s" class="nav-link%s"><i class="bi %s me-2"></i>%s</a>', $href, $isActive, $icon, $label);
   }
   echo '</nav>';
-  echo '<hr class="border-secondary">';
-  echo '<small>Use the search box or date filters to refine results. Analytics is based on Page Access logs.</small>';
+  echo '';
+  echo '';
   echo '</aside>';
 }
+
+
 
 function render_footer(bool $includeCharts = false): void
 {
   echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>';
+
   if ($includeCharts) {
-    echo '\n<script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>';
+    // Plotly CDN
+    echo "\n<script src=\"https://cdn.plot.ly/plotly-2.29.1.min.js\"></script>";
+    // Chart.js CDN
+    echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>";
+
+    // Chart.js Initialization
+    echo <<<JS
+<script>
+  // Monthly Overview Line Chart
+  const ctx1 = document.getElementById('monthlyOverview').getContext('2d');
+  new Chart(ctx1, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Monthly Data',
+        data: [4000, 3000, 2000, 2800, 1900, 2400],
+        borderColor: '#d01f28',
+        backgroundColor: '#d01f28',
+        tension: 0.4,
+        pointBackgroundColor: '#d01f28',
+        pointBorderColor: '#d01f28',
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  // Device Usage Pie Chart
+  const ctx2 = document.getElementById('deviceUsage').getContext('2d');
+  new Chart(ctx2, {
+    type: 'pie',
+    data: {
+      labels: ['Desktop 65%', 'Mobile 30%', 'Tablet 5%'],
+      datasets: [{
+        data: [65, 30, 5],
+        backgroundColor: ['#e63946', '#d01f28', '#ff7b7b'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { color: '#d01f28', font: { size: 14 } }
+        }
+      }
+    }
+  });
+</script>
+JS;
   }
+
   echo '</body></html>';
 }
+
 
 function render_login_page(?string $error): void
 {
