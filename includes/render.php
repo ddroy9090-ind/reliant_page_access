@@ -76,13 +76,7 @@ function render_footer(bool $includeECharts = false, bool $includeChartJs = fals
   if ($includeChartJs) {
     echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js\"></script>";
     if ($includeChartJsExtras) {
-      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js\"></script>";
-      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@4/dist/chartjs-chart-treemap.min.js\"></script>";
-      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-sankey@4/dist/chartjs-chart-sankey.min.js\"></script>";
-      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-funnel@4/dist/chartjs-chart-funnel.min.js\"></script>";
       echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2/dist/chartjs-chart-matrix.min.js\"></script>";
-      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js\"></script>";
-      echo "\n<script src=\"https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4/dist/chartjs-chart-geo.min.js\"></script>";
     }
   }
 
@@ -458,7 +452,6 @@ function render_analytics_script(array $initialState): void
   const charts = new Map();
   let resizeHandlerAttached = false;
   let defaultsRegistered = false;
-  let worldGeoPromise = null;
 
   const matrixValuePlugin = {
     id: 'matrixValuePlugin',
@@ -556,18 +549,7 @@ function render_analytics_script(array $initialState): void
     Chart.defaults.maintainAspectRatio = false;
     Chart.defaults.responsive = true;
 
-    registerNamespace(window.ChartTreemap);
-    registerNamespace(window.ChartSankey);
-    registerNamespace(window.ChartFunnel);
     registerNamespace(window.ChartMatrix);
-    registerNamespace(window.ChartGeo);
-    if (window.ChartDataLabels) {
-      try {
-        Chart.register(window.ChartDataLabels);
-      } catch (err) {
-        /* ignore */
-      }
-    }
   }
 
   function ensureChartJsReady(timeout = 10000) {
@@ -708,37 +690,6 @@ function render_analytics_script(array $initialState): void
     return `rgb(${blend(r1, r2)}, ${blend(g1, g2)}, ${blend(b1, b2)})`;
   }
 
-  function getWorldFeatures() {
-    if (worldGeoPromise) {
-      return worldGeoPromise;
-    }
-    if (!window.fetch || !window.ChartGeo || !window.ChartGeo.topojson) {
-      worldGeoPromise = Promise.resolve(null);
-      return worldGeoPromise;
-    }
-    const url = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json';
-    worldGeoPromise = fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to load world map data');
-        }
-        return response.json();
-      })
-      .then(topology => {
-        try {
-          return window.ChartGeo.topojson.feature(topology, topology.objects.countries).features;
-        } catch (err) {
-          console.error('[ANALYTICS_GEO_PARSE]', err);
-          return null;
-        }
-      })
-      .catch(err => {
-        console.error('[ANALYTICS_GEO_FETCH]', err);
-        return null;
-      });
-    return worldGeoPromise;
-  }
-
   function loadAnalytics() {
     const params = { analytics: '1', start: state.start, end: state.end };
     const qs = encodeQuery(params);
@@ -796,7 +747,7 @@ function render_analytics_script(array $initialState): void
     if (!labels.length) {
       setNoDataMessage('chart-popularity-bar', 'No page view data available.');
       setNoDataMessage('chart-popularity-pie', 'No traffic distribution data available.');
-      setNoDataMessage('chart-popularity-treemap', 'No treemap data available.');
+      setNoDataMessage('chart-popularity-treemap', 'No cumulative distribution data available.');
       return;
     }
 
@@ -864,47 +815,54 @@ function render_analytics_script(array $initialState): void
       }
     });
 
-    if (!hasChartType('treemap')) {
-      setNoDataMessage('chart-popularity-treemap', 'Treemap chart type is unavailable.');
-    } else {
-      initChart('chart-popularity-treemap', {
-        type: 'treemap',
-        data: {
-          datasets: [{
-            tree: labels.map((label, idx) => ({ label, value: visits[idx] })),
-            key: 'value',
-            groups: ['label'],
-            spacing: 1,
-            borderWidth: 1,
-            borderColor: '#ffffff',
-            backgroundColor(context) {
-              const index = context.dataIndex ?? 0;
-              return palette[index % palette.length];
-            },
-            labels: {
-              display: true,
-              formatter(ctx) {
-                const name = ctx.raw.g || '';
-                const value = typeof ctx.raw.v === 'number' ? ctx.raw.v : 0;
-                return `${name}
-${value}`;
-              }
-            }
-          }]
-        },
-        options: {
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                title: items => items?.[0]?.raw?.g || '',
-                label: item => `${item.raw?.v ?? 0} visits`
+    const cumulativeShare = [];
+    let runningTotal = 0;
+    visits.forEach(value => {
+      runningTotal += value;
+      const percent = totalVisits ? (runningTotal / totalVisits) * 100 : 0;
+      cumulativeShare.push(Number(percent.toFixed(1)));
+    });
+
+    initChart('chart-popularity-treemap', {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Cumulative share (%)',
+          data: cumulativeShare,
+          tension: 0.35,
+          fill: true,
+          borderColor: '#14b8a6',
+          backgroundColor: hexToRgba('#14b8a6', 0.18),
+          pointRadius: 3,
+          pointHoverRadius: 5
+        }]
+      },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: context => {
+                const idx = context.dataIndex ?? 0;
+                const visitCount = visits[idx] ?? 0;
+                const visitPercent = totalVisits ? ((visitCount / totalVisits) * 100).toFixed(1) : '0.0';
+                return `${context.formattedValue}% cumulative • ${visitCount} visits (${visitPercent}%)`;
               }
             }
           }
+        },
+        scales: {
+          x: { ticks: { autoSkip: false } },
+          y: {
+            beginAtZero: true,
+            max: 100,
+            title: { display: true, text: 'Cumulative share (%)' }
+          }
         }
-      });
-    }
+      }
+    });
   }
 
   function drawTrafficCharts(traffic) {
@@ -1083,28 +1041,39 @@ ${value}`;
 
     if (!sankeyData.length) {
       setNoDataMessage('chart-navigation-sankey', 'Not enough navigation data.');
-    } else if (!hasChartType('sankey')) {
-      setNoDataMessage('chart-navigation-sankey', 'Sankey chart type is unavailable.');
     } else {
+      const topFlows = sankeyData
+        .slice()
+        .sort((a, b) => b.flow - a.flow)
+        .slice(0, 12);
+      const flowLabels = topFlows.map(item => `${item.from} → ${item.to}`);
+      const flowValues = topFlows.map(item => item.flow);
+
       initChart('chart-navigation-sankey', {
-        type: 'sankey',
+        type: 'bar',
         data: {
+          labels: flowLabels,
           datasets: [{
-            data: sankeyData,
-            colorFrom: context => palette[context.dataIndex % palette.length],
-            colorTo: context => palette[(context.dataIndex + 1) % palette.length],
-            colorMode: 'gradient',
-            borderWidth: 0
+            label: 'Sessions',
+            data: flowValues,
+            backgroundColor: flowLabels.map((_, idx) => palette[idx % palette.length]),
+            borderRadius: 8,
+            maxBarThickness: 28
           }]
         },
         options: {
+          indexAxis: 'y',
           plugins: {
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: context => `${context.raw.from} → ${context.raw.to}: ${context.raw.flow}`
+                label: context => `${context.formattedValue} sessions`
               }
             }
+          },
+          scales: {
+            x: { beginAtZero: true, title: { display: true, text: 'Sessions' } },
+            y: { ticks: { autoSkip: false }, grid: { display: false } }
           }
         }
       });
@@ -1114,16 +1083,28 @@ ${value}`;
     const steps = Array.isArray(funnel.steps) ? funnel.steps : [];
     if (!steps.length) {
       setNoDataMessage('chart-navigation-funnel', 'Not enough funnel data.');
-    } else if (!hasChartType('funnel')) {
-      setNoDataMessage('chart-navigation-funnel', 'Funnel chart type is unavailable.');
     } else {
+      const labels = steps.map(step => step.label || step.name || '');
+      const values = steps.map(step => Number(step.value || 0));
+      const startingValue = values[0] || 0;
+      const conversionRates = values.map(value => {
+        if (!startingValue) return '0.0';
+        return ((value / startingValue) * 100).toFixed(1);
+      });
+
       initChart('chart-navigation-funnel', {
-        type: 'funnel',
+        type: 'line',
         data: {
-          labels: steps.map(step => step.label || step.name || ''),
+          labels,
           datasets: [{
-            data: steps.map(step => Number(step.value || 0)),
-            backgroundColor: steps.map((_, idx) => palette[idx % palette.length])
+            label: 'Sessions',
+            data: values,
+            tension: 0.35,
+            fill: true,
+            borderColor: '#2563eb',
+            backgroundColor: hexToRgba('#2563eb', 0.18),
+            pointRadius: 4,
+            pointHoverRadius: 6
           }]
         },
         options: {
@@ -1131,9 +1112,17 @@ ${value}`;
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: context => `${context.label}: ${context.formattedValue}`
+                label: context => {
+                  const idx = context.dataIndex ?? 0;
+                  const rate = conversionRates[idx] ?? '0.0';
+                  return `${context.formattedValue} sessions (${rate}%)`;
+                }
               }
             }
+          },
+          scales: {
+            x: { ticks: { autoSkip: false } },
+            y: { beginAtZero: true, title: { display: true, text: 'Sessions' } }
           }
         }
       });
@@ -1206,55 +1195,52 @@ ${value}`;
     const countries = Array.isArray(geography.countries) ? geography.countries : [];
     if (!countries.length) {
       setNoDataMessage('chart-geo-heat', 'No geographic data available.');
-    } else if (!hasChartType('choropleth')) {
-      setNoDataMessage('chart-geo-heat', 'Geo chart type is unavailable.');
     } else {
-      const countryMap = new Map();
-      countries.forEach(item => {
-        const key = String(item.country || item.label || '').toLowerCase();
-        if (key) {
-          countryMap.set(key, Number(item.count || item.value || 0));
-        }
-      });
-      getWorldFeatures().then(features => {
-        if (!features || !features.length) {
-          setNoDataMessage('chart-geo-heat', 'Unable to load map data.');
-          return;
-        }
-        const datasetData = features.map(feature => {
-          const name = String(feature.properties?.name || '').toLowerCase();
-          const value = countryMap.get(name) || 0;
-          return { feature, value };
-        });
-        const values = datasetData.map(item => item.value);
-        const max = values.reduce((acc, value) => Math.max(acc, value), 0);
+      const processedCountries = countries
+        .map(item => ({
+          label: item.country || item.label || 'Unknown',
+          value: Number(item.count || item.value || 0)
+        }))
+        .filter(item => item.label)
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 10);
+
+      if (!processedCountries.length) {
+        setNoDataMessage('chart-geo-heat', 'No geographic data available.');
+      } else {
+        const labels = processedCountries.map(item => item.label);
+        const values = processedCountries.map(item => item.value);
+        const total = values.reduce((sum, value) => sum + value, 0);
+
         initChart('chart-geo-heat', {
-          type: 'choropleth',
+          type: 'doughnut',
           data: {
-            labels: datasetData.map(item => item.feature.properties?.name || ''),
+            labels,
             datasets: [{
-              label: 'Visits',
-              outline: features,
-              data: datasetData
+              data: values,
+              backgroundColor: labels.map((_, idx) => palette[idx % palette.length]),
+              borderWidth: 0
             }]
           },
           options: {
-            scales: {
-              projection: { axis: 'x', projection: 'equalEarth' },
-              color: { axis: 'y', min: 0, max: max || 1, quantize: 6 }
-            },
+            cutout: '45%',
             plugins: {
-              legend: { display: false },
+              legend: { position: 'bottom' },
               tooltip: {
                 callbacks: {
-                  title: items => items?.[0]?.label || '',
-                  label: item => `${item.raw?.value ?? 0} visits`
+                  label: context => {
+                    const rawValue = typeof context.parsed === 'number'
+                      ? context.parsed
+                      : Number(context.parsed || 0);
+                    const percent = total ? ((rawValue / total) * 100).toFixed(1) : '0.0';
+                    return `${context.label}: ${context.formattedValue} (${percent}%)`;
+                  }
                 }
               }
             }
           }
         });
-      });
+      }
     }
 
     const regions = Array.isArray(geography.regions) ? geography.regions : [];
