@@ -40,35 +40,36 @@ render_sidebar('logs');
 <main class="col-12 col-md-9 col-lg-10 content">
   <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between mb-3 gap-3">
     <div>
-      <h3 id="title" class="mb-0">Page Access Logs</h3>
-      <span class="badge-soft mt-2 d-inline-flex align-items-center gap-2"><i class="bi bi-filter"></i><span>Interactive filters enabled</span></span>
+      <h3 id="title"  class="title-heading">Page Access Logs</h3>
+      <!-- <span class="badge-soft mt-2 d-inline-flex align-items-center gap-2"><i class="bi bi-filter"></i><span>Interactive filters enabled</span></span> -->
     </div>
     <div class="log-type-toggle btn-group" role="group" aria-label="Log type">
-      <a href="#" class="btn btn-outline-primary" data-log-type="page"><i class="bi bi-file-text me-1"></i>Page access</a>
-      <a href="#" class="btn btn-outline-primary" data-log-type="cert"><i class="bi bi-patch-check me-1"></i>Certificate searches</a>
+      <a href="#" class="btn btn-primary" data-log-type="page"><i class="bi bi-file-text me-1"></i>Page access</a>
+      <a href="#" class="btn btn-primary" data-log-type="cert"><i class="bi bi-patch-check me-1"></i>Certificate searches</a>
     </div>
   </div>
 
-  <div class="d-flex align-items-center gap-2 mb-3">
-    <label for="per" class="form-label mb-0 text-muted">Rows</label>
-    <select id="per" class="form-select form-select-sm" style="width: 140px;">
-      <option value="10">10 / page</option>
-      <option value="25">25 / page</option>
-      <option value="50">50 / page</option>
-      <option value="100">100 / page</option>
-    </select>
-  </div>
-
-  <div class="row g-3 align-items-end mb-3" id="filters-row">
-    <div class="col-sm-6 col-md-3">
+  <div class="row g-3 align-items-end mb-3 mt-5" id="filters-row">
+    <div class="col-lg-3">
+      <label for="per" class="form-label">Rows</label>
+      <div class="d-flex align-items-center gap-2">
+        <select id="per" class="form-select form-control">
+          <option value="10">10 / page</option>
+          <option value="25">25 / page</option>
+          <option value="50">50 / page</option>
+          <option value="100">100 / page</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-lg-3">
       <label class="form-label" for="start-date">Start date</label>
       <input type="date" class="form-control" id="start-date" value="<?= htmlspecialchars($start, ENT_QUOTES, 'UTF-8') ?>">
     </div>
-    <div class="col-sm-6 col-md-3">
+    <div class="col-lg-3">
       <label class="form-label" for="end-date">End date</label>
       <input type="date" class="form-control" id="end-date" value="<?= htmlspecialchars($end, ENT_QUOTES, 'UTF-8') ?>">
     </div>
-    <div class="col-12 col-md-6 text-md-end d-flex gap-2 justify-content-md-end">
+    <div class="col-lg-3">
       <button class="btn btn-outline-primary" id="export-csv"><i class="bi bi-filetype-csv me-1"></i>Export CSV</button>
       <button class="btn btn-primary" id="open-analytics"><i class="bi bi-graph-up me-1"></i>View Analytics</button>
     </div>
@@ -81,10 +82,12 @@ render_sidebar('logs');
 
   <div class="box">
     <div class="table-responsive">
-      <table class="table table-hover table-striped align-middle mb-0">
-        <thead id="thead" class="table-dark sticky-head"></thead>
+      <table class="table table-hover">
+        <thead id="thead" class="table-secondary"></thead>
         <tbody id="tbody">
-          <tr><td colspan="6" class="text-center py-4 text-muted">Loading…</td></tr>
+          <tr>
+            <td colspan="6" class="text-center py-4 text-muted">Loading…</td>
+          </tr>
         </tbody>
       </table>
     </div>

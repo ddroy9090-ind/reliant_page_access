@@ -1,3 +1,6 @@
+.logo{
+    width: 200px;
+}
 .content .title-heading {
     font-size: 24px;
     font-weight: 600;
@@ -85,6 +88,66 @@
     width: 100% !important;
     height: 100% !important;
 }
+
+.form-control:focus {
+    box-shadow: none !important;
+    border-color: #d01f28 !important;
+}
+
+table {
+    table-layout: fixed;
+    /* ensures equal column width */
+    width: 100%;
+    /* use full width */
+    border-collapse: collapse;
+}
+
+table th,
+table td {
+    width: auto;
+    /* width: calc(100% / 6);   */
+    text-align: center;
+    padding: 8px 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.active>.page-link,
+.page-link.active {
+    background-color: #d01f28;
+    border-color: #d01f28;
+    color: #fff;
+}
+
+.active>.page-link:hover {
+    color: #fff;
+}
+
+.page-link {
+    color: #111;
+}
+
+.page-link:hover {
+    color: #d01f28;
+}
+
+.page-link:focus {
+    box-shadow: none;
+    border-color: #d01f28;
+}
+
+.logoutform {
+    position: absolute;
+    top: 265px;
+    left: 22px;
+}
+
+.logoutform button {
+    padding: 10px 76px;
+    border-radius: 10px;
+}
+
 
 @media (max-width: 1199.98px) {
     .stat-grid {

@@ -31,8 +31,9 @@ render_sidebar('analytics');
 <main class="col-12 col-md-9 col-lg-10 content">
   <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-3 gap-3">
     <div>
-      <h3 class="mb-0">Analytics Dashboard</h3>
-      <small class="text-muted">Insights generated from page access logs within the selected date range.</small>
+      
+      <h3 class="title-heading">Analytics Dashboard</h3>
+      <p class="para">Insights generated from page access logs within the selected date range.</p>
     </div>
     <div class="d-flex flex-wrap gap-2">
       <a class="btn btn-outline-secondary" href="page_access_logs.php"><i class="bi bi-list-ul me-1"></i>Back to Logs</a>

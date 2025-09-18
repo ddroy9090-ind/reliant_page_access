@@ -38,9 +38,9 @@ function render_sidebar(string $active): void
   ];
 
   echo '<aside class="col-12 col-md-3 col-lg-2 sidebar p-3">';
-  echo '<div class="d-flex align-items-center justify-content-between mb-2 py-4">';
-  echo '<h4 class="brand mb-0">Logs Center</h4>';
-  echo '<form method="post" class="mb-0">';
+  echo '<div class="mb-2 pb-2">';
+  echo '<img src="assets/images/logo.webp" alt="" class="logo">';
+  echo '<form method="post" class="mb-0 logoutform">';
   echo '<input type="hidden" name="csrf" value="' . $csrf . '">';
   echo '<button class="btn btn-outline-light btn-sm" name="logout" title="Logout">';
   echo '<i class="bi bi-box-arrow-right me-1"></i>Logout';
@@ -84,7 +84,7 @@ function render_footer(bool $includePlotly = false, bool $includeChartJs = false
 
 function render_login_page(?string $error): void
 {
-  render_head('BTSPL ADMIN PORTAL', 'login-body');
+  render_head('Reliant Monitor Portal', 'login-body');
   $errorHtml = '';
   if ($error) {
     $escaped = htmlspecialchars($error, ENT_QUOTES, 'UTF-8');
@@ -94,7 +94,7 @@ function render_login_page(?string $error): void
   echo <<<HTML
 <div class="login-wrapper d-flex align-items-center justify-content-center">
   <div class="login-card box text-light">
-    <h3 class="text-center fw-bold mb-4">BTSPL ADMIN PORTAL</h3>
+    <h3 class="text-center fw-bold mb-4">Reliant Monitor Portal</h3>
     {$errorHtml}
     <form method="post" autocomplete="off">
       <input type="hidden" name="csrf" value="{$csrf}">
@@ -108,6 +108,7 @@ function render_login_page(?string $error): void
       </div>
       <button class="btn btn-primary w-100">Sign in</button>
     </form>
+
   </div>
 </div>
 HTML;

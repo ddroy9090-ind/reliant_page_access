@@ -19,7 +19,7 @@ body {
 
 .sidebar .brand {
   color: #e2e8f0;
-  font-weight: 700;
+  /* font-weight: 700; */
   letter-spacing: 0.4px;
 }
 
@@ -157,10 +157,13 @@ body {
   border-radius: 16px;
   padding: 32px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  width: 450px;
 }
 
 .login-card h3 {
   color: #111;
+  margin-bottom: 15px;
+  font-size: 20px;
 }
 
 .login-card form .form-label {
@@ -173,11 +176,24 @@ body {
 }
 
 .log-type-toggle .btn {
-  border-radius: 999px;
+  border-radius: 5px !important;
 
 }
 
-.btn-primary{
+.btn-primary:hover{
+  background-color: #d01f28;
+  border-color: #d01f28;
+}
+
+.btn-group,
+.btn-group-vertical {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  gap: 12px;
+}
+
+.btn-primary {
   background: #d01f28;
   border-color: #d01f28;
   color: #fff;
