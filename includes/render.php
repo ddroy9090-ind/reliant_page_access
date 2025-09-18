@@ -34,7 +34,7 @@ function render_sidebar(string $active): void
   ];
 
   echo '<aside class="col-12 col-md-3 col-lg-2 sidebar p-3">';
-  echo '<div class="d-flex align-items-center justify-content-between mb-2">';
+  echo '<div class="d-flex align-items-center justify-content-between mb-2 py-4">';
   echo '<h4 class="brand mb-0">Logs Center</h4>';
   echo '<form method="post" class="mb-0">';
   echo '<input type="hidden" name="csrf" value="' . $csrf . '">';
@@ -64,7 +64,7 @@ function render_footer(bool $includeCharts = false): void
   if ($includeCharts) {
     echo '\n<script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>';
   }
-  echo '\n</body>\n</html>';
+  echo '</body></html>';
 }
 
 function render_login_page(?string $error): void

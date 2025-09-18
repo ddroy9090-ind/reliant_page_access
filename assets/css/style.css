@@ -1,16 +1,17 @@
 body {
   background: #eef2f7;
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  color: #0f172a;
+  color: #d01f28;
 }
 
 .layout {
   min-height: 100vh;
+  padding: 0;
 }
 
 .sidebar {
   min-height: 100vh;
-  background: #0f172a;
+  background: #d01f28;
   color: #cbd5e1;
 }
 
@@ -21,15 +22,17 @@ body {
 }
 
 .sidebar .nav-link {
-  color: #cbd5e1;
+  color: #fff;
   border-radius: 10px;
-  font-weight: 500;
+  font-weight: 400;
+  margin: 5px 0;
 }
 
 .sidebar .nav-link.active,
 .sidebar .nav-link:hover {
-  background: #1c2943;
-  color: #ffffff;
+  background: #fff;
+  color: #d01f28;
+  font-size: inherit;
 }
 
 .sidebar small {
@@ -135,7 +138,7 @@ body {
 }
 
 .login-body {
-  background: #0d1b2a;
+  background: #d01f28;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -148,14 +151,34 @@ body {
 }
 
 .login-card {
-  background: #1b263b;
+  background: #fff;
   border-radius: 16px;
   padding: 32px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
 
+.login-card h3 {
+  color: #111;
+}
+
+.login-card form .form-label {
+  color: #111;
+}
+
+.login-card form input:focus {
+  box-shadow: none;
+  border-color: #d01f28;
+}
+
 .log-type-toggle .btn {
   border-radius: 999px;
+
+}
+
+button.btn.btn-primary{
+  background: #d01f28;
+  border-color: #d01f28;
+  color: #fff;
 }
 
 .stat-grid {
