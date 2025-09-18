@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/bootstrap.php';
 require_once __DIR__ . '/includes/render.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/analytics.php';
 
 process_logout();
 
@@ -17,6 +18,7 @@ $pdo = db();
 $pageTotal = $certTotal = $pageWeek = $certWeek = 0;
 $latestPage = $latestCert = null;
 $monthlyLabels = $monthlyCounts = [];
+$deviceChartLabels = $deviceChartCounts = [];
 $error = null;
 
 try {
@@ -62,6 +64,44 @@ try {
     $key = $month->format('Y-m');
     $monthlyLabels[] = $month->format('M Y');
     $monthlyCounts[] = $monthlyMap[$key] ?? 0;
+  }
+
+  $deviceCounts = [
+    'Desktop' => 0,
+    'Mobile'  => 0,
+    'Tablet'  => 0,
+    'Bot'     => 0,
+    'Unknown' => 0,
+  ];
+
+  $deviceStmt = $pdo->prepare(
+    'SELECT user_agent, device_type
+       FROM page_access_logs
+      WHERE accessed_at >= :start AND accessed_at < :end'
+  );
+
+  $deviceStmt->execute([
+    ':start' => $periodStart->format('Y-m-01 00:00:00'),
+    ':end'   => $periodEnd->format('Y-m-01 00:00:00'),
+  ]);
+
+  foreach ($deviceStmt as $row) {
+    $device = detect_device($row);
+    $deviceCounts[$device] = ($deviceCounts[$device] ?? 0) + 1;
+  }
+
+  arsort($deviceCounts);
+
+  foreach ($deviceCounts as $label => $count) {
+    if ($count > 0) {
+      $deviceChartLabels[] = $label;
+      $deviceChartCounts[] = $count;
+    }
+  }
+
+  if (!$deviceChartLabels) {
+    $deviceChartLabels = array_keys($deviceCounts);
+    $deviceChartCounts = array_values($deviceCounts);
   }
 } catch (Throwable $e) {
   $error = 'Unable to fetch summary data at this time.';
@@ -131,64 +171,95 @@ render_sidebar('home');
     <!-- Chart.js should load BEFORE our script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.min.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        // Monthly Overview Line Chart
-        new Chart(document.getElementById('monthlyOverview'), {
-          type: 'line',
-          data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-              label: 'Monthly Data',
-              data: [4000, 3000, 2000, 2800, 1900, 2400],
-              borderColor: '#004a44',
-              backgroundColor: '#004a44',
-              tension: 0.4,
-              pointBackgroundColor: '#004a44',
-              pointBorderColor: '#004a44',
-              fill: false
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true
-              }
-            }
-          }
-        });
+      document.addEventListener('DOMContentLoaded', function () {
+        const monthlyLabels = <?= json_encode($monthlyLabels, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+        const monthlyCounts = <?= json_encode($monthlyCounts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+        const deviceLabels  = <?= json_encode($deviceChartLabels, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+        const deviceCounts  = <?= json_encode($deviceChartCounts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
 
-        // Device Usage Pie Chart
-        new Chart(document.getElementById('deviceUsage'), {
-          type: 'pie',
-          data: {
-            labels: ['Desktop 65%', 'Mobile 30%', 'Tablet 5%'],
-            datasets: [{
-              data: [65, 30, 5],
-              backgroundColor: ['#004a44', '#00796b', '#80cbc4'],
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  color: '#004a44',
-                  font: {
-                    size: 14
+        const monthlyCtx = document.getElementById('monthlyOverview');
+        if (monthlyCtx) {
+          new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+              labels: monthlyLabels,
+              datasets: [{
+                label: 'Monthly page views',
+                data: monthlyCounts,
+                borderColor: '#004a44',
+                backgroundColor: 'rgba(0, 74, 68, 0.1)',
+                tension: 0.35,
+                pointBackgroundColor: '#004a44',
+                pointBorderColor: '#004a44',
+                fill: true
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                },
+                tooltip: {
+                  callbacks: {
+                    label(context) {
+                      const value = context.parsed.y ?? 0;
+                      return new Intl.NumberFormat().format(value) + ' visits';
+                    }
+                  }
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback(value) {
+                      return new Intl.NumberFormat().format(value);
+                    }
                   }
                 }
               }
             }
-          }
-        });
+          });
+        }
+
+        const deviceCtx = document.getElementById('deviceUsage');
+        if (deviceCtx) {
+          const devicePalette = ['#004a44', '#00796b', '#26a69a', '#4db6ac', '#80cbc4'];
+          new Chart(deviceCtx, {
+            type: 'doughnut',
+            data: {
+              labels: deviceLabels,
+              datasets: [{
+                data: deviceCounts,
+                backgroundColor: devicePalette.slice(0, deviceLabels.length),
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    usePointStyle: true
+                  }
+                },
+                tooltip: {
+                  callbacks: {
+                    label(context) {
+                      const label = context.label || '';
+                      const value = context.parsed;
+                      return `${label}: ${new Intl.NumberFormat().format(value)} visits`;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
       });
     </script>
 
