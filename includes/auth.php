@@ -18,11 +18,11 @@ function process_logout(): void
   }
   csrf_check($_POST['csrf'] ?? '');
   session_destroy();
-  header('Location: ' . ($_SERVER['PHP_SELF'] ?? 'certlog.php'));
+  header('Location: login.php');
   exit;
 }
 
-function handle_login(): void
+function handle_login(string $redirect = 'index.php'): void
 {
   $error = null;
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,7 +32,7 @@ function handle_login(): void
     $p = trim($_POST['password'] ?? '');
     if ($u === ADMIN_USER && $p === ADMIN_PASS) {
       authenticate();
-      header('Location: ' . ($_SERVER['PHP_SELF'] ?? 'certlog.php'));
+      header('Location: ' . $redirect);
       exit;
     }
     $error = 'Invalid username or password';
