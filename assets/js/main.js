@@ -8,6 +8,13 @@
   const monthlyCanvas = document.getElementById('monthlyOverview');
   if (monthlyCanvas) {
     const ctx = monthlyCanvas.getContext('2d');
+    const existingChart = typeof Chart.getChart === 'function'
+      ? Chart.getChart(monthlyCanvas)
+      : null;
+    if (existingChart) {
+      existingChart.destroy();
+    }
+
     new Chart(ctx, {
       type: 'line',
       data: {
@@ -46,6 +53,13 @@
   const deviceCanvas = document.getElementById('deviceUsage');
   if (deviceCanvas) {
     const ctx = deviceCanvas.getContext('2d');
+    const existingChart = typeof Chart.getChart === 'function'
+      ? Chart.getChart(deviceCanvas)
+      : null;
+    if (existingChart) {
+      existingChart.destroy();
+    }
+
     new Chart(ctx, {
       type: 'pie',
       data: {
