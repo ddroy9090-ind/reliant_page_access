@@ -15,19 +15,58 @@
       existingChart.destroy();
     }
 
+    let labels = [];
+    let values = [];
+    const rawDataset = monthlyCanvas.dataset.chart;
+
+    if (rawDataset) {
+      try {
+        const parsed = JSON.parse(rawDataset);
+        if (Array.isArray(parsed.labels) && parsed.labels.length > 0) {
+          labels = parsed.labels;
+          const countArray = Array.isArray(parsed.counts) ? parsed.counts : [];
+          values = labels.map((_, index) => {
+            const value = Number(countArray[index]);
+            return Number.isFinite(value) ? value : 0;
+          });
+        }
+      } catch (error) {
+        console.warn('Unable to parse monthly chart data', error);
+      }
+    }
+
+    if (!labels.length) {
+      labels = ['No data'];
+      values = [0];
+    }
+
+    const maxValue = values.reduce((acc, value) => Math.max(acc, value), 0);
+    const yAxisOptions = {
+      beginAtZero: true,
+      ticks: {
+        callback: value => `${value}`
+      }
+    };
+
+    if (maxValue === 0) {
+      yAxisOptions.suggestedMax = 5;
+    }
+
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        labels,
         datasets: [
           {
-            label: 'Monthly Data',
-            data: [4000, 3000, 2000, 2800, 1900, 2400],
+            label: 'Visits per month',
+            data: values,
             borderColor: '#d01f28',
             backgroundColor: 'rgba(208, 31, 40, 0.15)',
-            tension: 0.4,
+            tension: 0.35,
             pointBackgroundColor: '#d01f28',
             pointBorderColor: '#d01f28',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#d01f28',
             fill: true
           }
         ]
@@ -39,12 +78,7 @@
           legend: { display: false }
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: value => `${value}`
-            }
-          }
+          y: yAxisOptions
         }
       }
     });

@@ -16,6 +16,7 @@ if (!is_authenticated()) {
 $pdo = db();
 $pageTotal = $certTotal = $pageWeek = $certWeek = 0;
 $latestPage = $latestCert = null;
+$monthlyLabels = $monthlyCounts = [];
 $error = null;
 
 try {
@@ -33,6 +34,35 @@ try {
 
   $latestCertStmt = $pdo->query('SELECT MAX(searched_at) FROM certificate_search_logs');
   $latestCert = $latestCertStmt->fetchColumn() ?: null;
+
+  $currentMonth = new DateTime('first day of this month');
+  $currentMonth->setTime(0, 0, 0);
+  $periodStart = (clone $currentMonth)->modify('-5 months');
+  $periodEnd = (clone $currentMonth)->modify('+1 month');
+
+  $monthlyStmt = $pdo->prepare(
+    'SELECT DATE_FORMAT(accessed_at, "%Y-%m") AS month_key, COUNT(*) AS total
+     FROM page_access_logs
+     WHERE accessed_at >= :start AND accessed_at < :end
+     GROUP BY month_key'
+  );
+
+  $monthlyStmt->execute([
+    ':start' => $periodStart->format('Y-m-01 00:00:00'),
+    ':end'   => $periodEnd->format('Y-m-01 00:00:00'),
+  ]);
+
+  $monthlyMap = [];
+  foreach ($monthlyStmt as $row) {
+    $monthlyMap[$row['month_key']] = (int)$row['total'];
+  }
+
+  $period = new DatePeriod($periodStart, new DateInterval('P1M'), 6);
+  foreach ($period as $month) {
+    $key = $month->format('Y-m');
+    $monthlyLabels[] = $month->format('M Y');
+    $monthlyCounts[] = $monthlyMap[$key] ?? 0;
+  }
 } catch (Throwable $e) {
   $error = 'Unable to fetch summary data at this time.';
 }
@@ -84,7 +114,17 @@ render_sidebar('home');
       <div class="col-md-6">
         <div class="chart-card">
           <h5 class="fw-semibold mb-3">Monthly Overview</h5>
-          <canvas id="monthlyOverview"></canvas>
+          <?php
+          $monthlyPayload = htmlspecialchars(
+            json_encode([
+              'labels' => $monthlyLabels,
+              'counts' => $monthlyCounts,
+            ], JSON_UNESCAPED_SLASHES),
+            ENT_QUOTES,
+            'UTF-8'
+          );
+          ?>
+          <canvas id="monthlyOverview" data-chart="<?= $monthlyPayload ?>"></canvas>
         </div>
       </div>
       <div class="col-md-6">
