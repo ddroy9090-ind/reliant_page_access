@@ -114,23 +114,38 @@ render_sidebar('home');
       <div class="col-md-6">
         <div class="chart-card">
           <h5 class="fw-semibold mb-3">Monthly Overview</h5>
-          <?php
-          $monthlyPayload = htmlspecialchars(
-            json_encode([
-              'labels' => $monthlyLabels,
-              'counts' => $monthlyCounts,
-            ], JSON_UNESCAPED_SLASHES),
-            ENT_QUOTES,
-            'UTF-8'
-          );
-          ?>
-          <canvas id="monthlyOverview" data-chart="<?= $monthlyPayload ?>"></canvas>
+          <?php if ($monthlyLabels): ?>
+            <ul class="list-group list-group-flush small">
+              <?php foreach ($monthlyLabels as $index => $label): ?>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></span>
+                  <span class="fw-semibold"><?= number_format($monthlyCounts[$index] ?? 0) ?></span>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php else: ?>
+            <p class="text-muted mb-0">No monthly data available yet.</p>
+          <?php endif; ?>
         </div>
       </div>
       <div class="col-md-6">
         <div class="chart-card">
           <h5 class="fw-semibold mb-3">Device Usage</h5>
-          <canvas id="deviceUsage"></canvas>
+          <ul class="list-group list-group-flush small">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>Desktop</span>
+              <span class="fw-semibold">65%</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>Mobile</span>
+              <span class="fw-semibold">30%</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>Tablet</span>
+              <span class="fw-semibold">5%</span>
+            </li>
+          </ul>
+          <p class="text-muted small mb-0">Based on internal traffic estimates.</p>
         </div>
       </div>
     </div>
@@ -140,4 +155,4 @@ render_sidebar('home');
 <?php
 echo '</div>';
 echo '</div>';
-render_footer(true);
+render_footer();
