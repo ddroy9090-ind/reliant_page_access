@@ -105,6 +105,22 @@ INSERT INTO `enquiries` (`id`, `name`, `email`, `phone`, `company`, `ip_address`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `blogs`
+--
+
+CREATE TABLE `blogs` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `image_path` varchar(255) NOT NULL,
+  `heading` varchar(255) NOT NULL,
+  `banner_description` text NOT NULL,
+  `author_name` varchar(255) NOT NULL,
+  `content` longtext NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `page_access_logs`
 --
 
@@ -3219,6 +3235,12 @@ INSERT INTO `popup_enquiry` (`id`, `full_name`, `email`, `phone`, `company`, `ip
 --
 
 --
+-- Indexes for table `blogs`
+--
+ALTER TABLE `blogs`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `certificates`
 --
 ALTER TABLE `certificates`
@@ -3253,6 +3275,12 @@ ALTER TABLE `popup_enquiry`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `blogs`
+--
+ALTER TABLE `blogs`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `certificates`

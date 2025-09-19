@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':content'             => $content,
       ]);
 
-      $success = 'Blog entry added successfully.';
+      $success = 'Your Blog has been added successfully.';
       $heading = $bannerDescription = $authorName = $content = '';
       $imagePath = null;
     }
@@ -143,7 +143,7 @@ render_sidebar('add-blogs');
   </div>
 
   <?php if ($success): ?>
-    <div class="alert alert-success" role="alert" id="blog-success-alert">
+    <div class="alert alert-success fade show" role="alert" id="blog-success-alert">
       <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
     </div>
   <?php endif; ?>
@@ -201,8 +201,27 @@ echo '</div>';
     if (!textarea) {
       return;
     }
+    window.blogEditorReadyQueue = window.blogEditorReadyQueue || [];
     ClassicEditor
       .create(textarea)
+      .then(editor => {
+        window.blogEditorInstance = editor;
+        window.blogEditorReadyQueue.forEach(callback => {
+          try {
+            callback(editor);
+          } catch (callbackError) {
+            console.error('Blog editor ready callback failed', callbackError);
+          }
+        });
+        window.blogEditorReadyQueue = [];
+
+        const form = document.getElementById('add-blog-form');
+        if (form) {
+          form.addEventListener('reset', () => {
+            editor.setData('');
+          });
+        }
+      })
       .catch(error => {
         console.error('CKEditor initialization failed', error);
       });
@@ -220,7 +239,21 @@ echo '</div>';
       form.reset();
     }
 
+    const resetEditor = editor => {
+      if (editor && typeof editor.setData === 'function') {
+        editor.setData('');
+      }
+    };
+
+    if (window.blogEditorInstance) {
+      resetEditor(window.blogEditorInstance);
+    } else {
+      window.blogEditorReadyQueue = window.blogEditorReadyQueue || [];
+      window.blogEditorReadyQueue.push(resetEditor);
+    }
+
     window.setTimeout(() => {
+      alertBox.classList.remove('show');
       alertBox.classList.add('d-none');
     }, 5000);
   })();
