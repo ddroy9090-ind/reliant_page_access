@@ -206,6 +206,9 @@ echo '</div>';
       .create(textarea)
       .then(editor => {
         window.blogEditorInstance = editor;
+        if (textarea.hasAttribute('required')) {
+          textarea.removeAttribute('required');
+        }
         window.blogEditorReadyQueue.forEach(callback => {
           try {
             callback(editor);
@@ -217,8 +220,12 @@ echo '</div>';
 
         const form = document.getElementById('add-blog-form');
         if (form) {
+          form.addEventListener('submit', () => {
+            textarea.value = editor.getData();
+          });
           form.addEventListener('reset', () => {
             editor.setData('');
+            textarea.value = '';
           });
         }
       })
@@ -242,6 +249,10 @@ echo '</div>';
     const resetEditor = editor => {
       if (editor && typeof editor.setData === 'function') {
         editor.setData('');
+      }
+      const textarea = document.getElementById('content');
+      if (textarea) {
+        textarea.value = '';
       }
     };
 
