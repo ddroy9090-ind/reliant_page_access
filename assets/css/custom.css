@@ -138,11 +138,11 @@ table td {
     border-color: #d01f28;
 }
 
-/* .logoutform {
-    position: absolute;
-    top: 265px;
-    left: 22px;
-} */
+.logoutform {
+    position: fixed;
+    bottom: 10px;
+    left: 16px;
+}
 
 .logoutform button {
     padding: 10px 76px;

@@ -15,6 +15,7 @@ body {
   min-height: 100vh;
   background: #d01f28;
   color: #cbd5e1;
+  position: relative;
 }
 
 .sidebar .brand {
