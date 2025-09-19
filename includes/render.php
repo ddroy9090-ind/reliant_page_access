@@ -16,6 +16,7 @@ function render_head(string $title, string $bodyClass = ''): void
   <title>{$title}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="csrf-token" content="{$csrf}">
+  <link rel="shortcut icon" href="assets/images/favicon.png" type="image/x-icon">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
@@ -35,6 +36,7 @@ function render_sidebar(string $active): void
     'home'      => ['href' => 'index.php', 'icon' => 'bi-house',     'label' => 'Dashboard'],
     'logs'      => ['href' => 'page_access_logs.php', 'icon' => 'bi-universal-access-circle',       'label' => 'Page Access Logs'],
     'analytics' => ['href' => 'analytics_dashboard.php', 'icon' => 'bi-graph-up-arrow', 'label' => 'Analytics Dashboard'],
+    'contac-form' => ['href' => 'contact_form_submissions.php', 'icon' => 'bi-person-rolodex', 'label' => 'Contact Submisiions'],
   ];
 
   echo '<aside class="col-12 col-md-3 col-lg-2 sidebar p-3">';
@@ -98,17 +100,22 @@ function render_login_page(?string $error): void
   echo <<<HTML
 <div class="login-wrapper d-flex align-items-center justify-content-center">
   <div class="login-card box text-light">
-    <h3 class="text-center fw-bold mb-4">Reliant Monitor Portal</h3>
+    <div class="login-logo">
+        <img src="assets/images/logo.png" alt="">
+    </div>
+    <h3 class="text-center mb-4">Reliant Monitor Portal</h3>
     {$errorHtml}
     <form method="post" autocomplete="off">
       <input type="hidden" name="csrf" value="{$csrf}">
-      <div class="mb-3">
+      <div class="mb-3 position-relative login-icon">
         <label class="form-label">Username</label>
         <input class="form-control" name="username" required autofocus>
+        <i class="bi bi-person"></i>
       </div>
-      <div class="mb-3">
+      <div class="mb-3 position-relative login-icon">
         <label class="form-label">Password</label>
         <input type="password" class="form-control" name="password" required>
+        <i class="bi bi-lock"></i>
       </div>
       <button class="btn btn-primary w-100">Sign in</button>
     </form>

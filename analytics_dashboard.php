@@ -78,6 +78,8 @@ render_sidebar('analytics');
       </div>
     </section>
 
+    
+
     <section class="mb-4">
       <h4 class="fw-semibold mb-3">Traffic Over Time</h4>
       <div class="analytics-grid two-col">
@@ -92,7 +94,7 @@ render_sidebar('analytics');
       </div>
     </section>
 
-    <section class="mb-4">
+    <!-- <section class="mb-4">
       <h4 class="fw-semibold mb-3">Engagement Metrics</h4>
       <div class="analytics-grid two-col">
         <div class="chart-card">
@@ -108,7 +110,7 @@ render_sidebar('analytics');
           <div id="chart-engagement-exit" class="chart-container"><canvas></canvas></div>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <section class="mb-4">
       <h4 class="fw-semibold mb-3">Navigation Flow</h4>

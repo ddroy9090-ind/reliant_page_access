@@ -1,6 +1,7 @@
-.logo{
+.logo {
     width: 200px;
 }
+
 .content .title-heading {
     font-size: 24px;
     font-weight: 600;
@@ -137,15 +138,59 @@ table td {
     border-color: #d01f28;
 }
 
-.logoutform {
+/* .logoutform {
     position: absolute;
     top: 265px;
     left: 22px;
-}
+} */
 
 .logoutform button {
     padding: 10px 76px;
     border-radius: 10px;
+}
+
+.btn-check:checked+.btn,
+.btn.active,
+.btn.show,
+.btn:first-child:active,
+:not(.btn-check)+.btn:active {
+    color: #fff;
+    background-color: darkgreen;
+    border-color: darkgreen;
+}
+
+.login-body {
+
+    color: #fff;
+    overflow: hidden;
+    background-color: #d01f28;
+    background-image: url("../BG.png");
+    background-repeat: repeat;
+    background-size: cover;
+    background-blend-mode: multiply;
+}
+
+.login-logo{
+    text-align: center;
+}
+
+.login-logo img {
+    width: 150px;
+    margin-bottom: 10px;
+}
+
+.login-icon  i {
+    position: absolute;
+    color: #666;
+    top: 35px;
+    display: inline-block;
+    left: 8px;
+    font-weight: bold;
+    font-size: 21px;
+}
+
+.login-icon input{
+    padding-left: 33px !important;
 }
 
 

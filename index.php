@@ -107,7 +107,7 @@ try {
   $error = 'Unable to fetch summary data at this time.';
 }
 
-render_head('BTSPL ADMIN PORTAL');
+render_head('Reliant Monitor Portal');
 echo '<div class="container-fluid layout">';
 echo '<div class="row g-0">';
 render_sidebar('home');
@@ -130,7 +130,7 @@ render_sidebar('home');
   <?php else: ?>
     <section class="stat-grid mb-4">
       <div class="stat-card">
-        <h5>Total page access logs <i class="bi bi-currency-dollar icon"></i></h5>
+        <h5>Overall page access logs <i class="bi bi-currency-dollar icon"></i></h5>
         <div class="value"><?= number_format($pageTotal) ?></div>
         <div class="growth text-success">Last 7 days: <?= number_format($pageWeek) ?></div>
       </div>

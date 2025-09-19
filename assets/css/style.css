@@ -167,13 +167,16 @@ body {
 }
 
 .login-card h3 {
-  color: #111;
+  color: #737070;
   margin-bottom: 15px;
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .login-card form .form-label {
-  color: #111;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .login-card form input:focus {
@@ -186,7 +189,7 @@ body {
 
 }
 
-.btn-primary:hover{
+.btn-primary:hover {
   background-color: #d01f28;
   border-color: #d01f28;
 }

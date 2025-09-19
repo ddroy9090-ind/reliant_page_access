@@ -50,7 +50,7 @@ render_sidebar('logs');
   </div>
 
   <div class="row g-3 align-items-end mb-3 mt-5" id="filters-row">
-    <div class="col-lg-3">
+    <div class="col-lg-2">
       <label for="per" class="form-label">Rows</label>
       <div class="d-flex align-items-center gap-2">
         <select id="per" class="form-select form-control">
@@ -69,11 +69,13 @@ render_sidebar('logs');
       <label class="form-label" for="end-date">End date</label>
       <input type="date" class="form-control" id="end-date" value="<?= htmlspecialchars($end, ENT_QUOTES, 'UTF-8') ?>">
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-4">
       <button class="btn btn-outline-primary" id="export-csv"><i class="bi bi-filetype-csv me-1"></i>Export CSV</button>
       <button class="btn btn-primary" id="open-analytics"><i class="bi bi-graph-up me-1"></i>View Analytics</button>
     </div>
   </div>
+
+
 
   <div class="searchbar mb-3">
     <input id="q" class="form-control form-control-lg" placeholder="Search (IP, UA, URI, referer, certificate no., status)" value="<?= htmlspecialchars($q, ENT_QUOTES, 'UTF-8') ?>">
