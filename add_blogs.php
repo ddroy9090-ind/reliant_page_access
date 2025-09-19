@@ -13,21 +13,96 @@ if (!is_authenticated()) {
   exit;
 }
 
-$pdo = db();
+/**
+ * Ensure the blogs table exists before performing any operations.
+ */
+function add_blogs_ensure_table(PDO $pdo): void
+{
+  $pdo->exec(
+    'CREATE TABLE IF NOT EXISTS blogs (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      image_path VARCHAR(255) NOT NULL,
+      heading VARCHAR(255) NOT NULL,
+      banner_description TEXT NOT NULL,
+      author_name VARCHAR(255) NOT NULL,
+      content LONGTEXT NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+  );
+}
+
+/**
+ * Fetch a single blog entry by id.
+ */
+function add_blogs_find_blog(PDO $pdo, int $id): ?array
+{
+  $stmt = $pdo->prepare('SELECT * FROM blogs WHERE id = :id');
+  $stmt->execute([':id' => $id]);
+  $blog = $stmt->fetch();
+
+  return $blog ?: null;
+}
+
 $errors = [];
 $success = null;
 
-$heading = trim((string)($_POST['heading'] ?? ''));
-$bannerDescription = trim((string)($_POST['banner_description'] ?? ''));
-$authorName = trim((string)($_POST['author_name'] ?? ''));
-$content = trim((string)($_POST['content'] ?? ''));
+$heading = '';
+$bannerDescription = '';
+$authorName = '';
+$content = '';
+$currentImagePath = '';
+$editingId = 0;
+$isEditing = false;
+$existingBlog = null;
+
+$pdo = db();
+
 $imagePath = null;
-$pendingUpload = null;
+
+try {
+  add_blogs_ensure_table($pdo);
+} catch (Throwable $e) {
+  error_log('Failed to ensure blogs table exists: ' . $e->getMessage());
+  $errors[] = 'Unable to prepare the blogs storage. Please try again later.';
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $oldImageToDelete = null;
+  $newImageAbsolutePath = null;
+
   try {
     csrf_check($_POST['csrf'] ?? '');
-    rl_hit('add-blog', 20);
+
+    $editingId = (int)($_POST['blog_id'] ?? 0);
+    $isEditing = $editingId > 0;
+
+    if ($isEditing) {
+      rl_hit('update-blog', 20);
+    } else {
+      rl_hit('add-blog', 20);
+    }
+
+    $heading = trim((string)($_POST['heading'] ?? ''));
+    $bannerDescription = trim((string)($_POST['banner_description'] ?? ''));
+    $authorName = trim((string)($_POST['author_name'] ?? ''));
+    $content = trim((string)($_POST['content'] ?? ''));
+
+    if ($isEditing) {
+      try {
+        $existingBlog = add_blogs_find_blog($pdo, $editingId);
+      } catch (Throwable $fetchError) {
+        error_log('Failed to load blog for editing: ' . $fetchError->getMessage());
+        $existingBlog = null;
+      }
+
+      if (!$existingBlog) {
+        $errors[] = 'The selected blog could not be found.';
+        $isEditing = false;
+        $editingId = 0;
+      } else {
+        $currentImagePath = (string)($existingBlog['image_path'] ?? '');
+      }
+    }
 
     if ($heading === '') {
       $errors[] = 'Blog Heading is required.';
@@ -45,91 +120,158 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $errors[] = 'Blog Details content is required.';
     }
 
+    $imagePath = $currentImagePath;
     $file = $_FILES['image'] ?? null;
-    if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
-      $errors[] = 'Please upload a blog image.';
-    } elseif (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-      $errors[] = 'There was a problem uploading the image. Please try again.';
-    } else {
-      $tmpName = $file['tmp_name'] ?? '';
-      if (!is_uploaded_file($tmpName)) {
-        $errors[] = 'Invalid upload received.';
+
+    if ($file && ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+      if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+        $errors[] = 'There was a problem uploading the image. Please try again.';
       } else {
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mime = $finfo ? finfo_file($finfo, $tmpName) : null;
-        if ($finfo) {
-          finfo_close($finfo);
-        }
-
-        $allowed = [
-          'image/jpeg' => 'jpg',
-          'image/png'  => 'png',
-          'image/gif'  => 'gif',
-          'image/webp' => 'webp',
-        ];
-
-        if (!isset($allowed[$mime ?? ''])) {
-          $errors[] = 'Only JPEG, PNG, GIF, or WEBP images are allowed.';
+        $tmpName = (string)($file['tmp_name'] ?? '');
+        if (!is_uploaded_file($tmpName)) {
+          $errors[] = 'Invalid upload received.';
         } else {
-          $pendingUpload = [
-            'tmp_name'  => $tmpName,
-            'extension' => $allowed[$mime],
+          $finfo = finfo_open(FILEINFO_MIME_TYPE);
+          $mime = $finfo ? finfo_file($finfo, $tmpName) : null;
+          if ($finfo) {
+            finfo_close($finfo);
+          }
+
+          $allowed = [
+            'image/jpeg' => 'jpg',
+            'image/png'  => 'png',
+            'image/gif'  => 'gif',
+            'image/webp' => 'webp',
           ];
-        }
-      }
-    }
 
-    if (!$errors && $pendingUpload) {
-      $uploadDir = __DIR__ . '/assets/uploads/blogs';
-      if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
-        $errors[] = 'Unable to prepare the upload directory.';
-      } else {
-        $safeName = bin2hex(random_bytes(8));
-        $targetPath = $uploadDir . '/' . $safeName . '.' . $pendingUpload['extension'];
-        if (!move_uploaded_file($pendingUpload['tmp_name'], $targetPath)) {
-          $errors[] = 'Failed to save the uploaded image.';
-        } else {
-          $imagePath = 'assets/uploads/blogs/' . $safeName . '.' . $pendingUpload['extension'];
+          if (!isset($allowed[$mime ?? ''])) {
+            $errors[] = 'Only JPEG, PNG, GIF, or WEBP images are allowed.';
+          } else {
+            $uploadDir = __DIR__ . '/assets/uploads/blogs';
+            if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+              $errors[] = 'Unable to prepare the upload directory.';
+            } else {
+              try {
+                $safeName = bin2hex(random_bytes(8));
+              } catch (Throwable $randomError) {
+                error_log('Failed to generate image filename: ' . $randomError->getMessage());
+                $errors[] = 'Unable to process the uploaded image. Please try again.';
+                $safeName = null;
+              }
+
+              if ($safeName) {
+                $targetPath = $uploadDir . '/' . $safeName . '.' . $allowed[$mime];
+                if (!move_uploaded_file($tmpName, $targetPath)) {
+                  $errors[] = 'Failed to save the uploaded image.';
+                } else {
+                  $imagePath = 'assets/uploads/blogs/' . $safeName . '.' . $allowed[$mime];
+                  $newImageAbsolutePath = $targetPath;
+                  if ($isEditing) {
+                    $oldImageToDelete = $currentImagePath;
+                  }
+                }
+              }
+            }
+          }
         }
       }
+    } elseif (!$isEditing) {
+      $errors[] = 'Please upload a blog image.';
     }
 
     if (!$errors) {
-      $pdo->exec(
-        'CREATE TABLE IF NOT EXISTS blogs (
-          id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-          image_path VARCHAR(255) NOT NULL,
-          heading VARCHAR(255) NOT NULL,
-          banner_description TEXT NOT NULL,
-          author_name VARCHAR(255) NOT NULL,
-          content LONGTEXT NOT NULL,
-          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
-      );
+      if ($isEditing) {
+        $stmt = $pdo->prepare(
+          'UPDATE blogs
+              SET image_path = :image_path,
+                  heading = :heading,
+                  banner_description = :banner_description,
+                  author_name = :author_name,
+                  content = :content
+            WHERE id = :id'
+        );
+        $stmt->execute([
+          ':image_path'         => $imagePath,
+          ':heading'            => $heading,
+          ':banner_description' => $bannerDescription,
+          ':author_name'        => $authorName,
+          ':content'            => $content,
+          ':id'                 => $editingId,
+        ]);
 
-      $stmt = $pdo->prepare(
-        'INSERT INTO blogs (image_path, heading, banner_description, author_name, content, created_at)
-         VALUES (:image_path, :heading, :banner_description, :author_name, :content, NOW())'
-      );
-      $stmt->execute([
-        ':image_path'          => $imagePath,
-        ':heading'             => $heading,
-        ':banner_description'  => $bannerDescription,
-        ':author_name'         => $authorName,
-        ':content'             => $content,
-      ]);
+        $success = 'Blog updated successfully.';
+        $currentImagePath = (string)$imagePath;
 
-      $success = 'Your Blog has been added successfully.';
-      $heading = $bannerDescription = $authorName = $content = '';
-      $imagePath = null;
+        if ($oldImageToDelete && $currentImagePath !== $oldImageToDelete) {
+          $uploadsDir = realpath(__DIR__ . '/assets/uploads/blogs');
+          $oldImageFull = __DIR__ . '/' . ltrim($oldImageToDelete, '/');
+          if ($uploadsDir && is_file($oldImageFull)) {
+            $oldImageReal = realpath($oldImageFull);
+            if ($oldImageReal && strncmp($oldImageReal, $uploadsDir, strlen($uploadsDir)) === 0) {
+              @unlink($oldImageReal);
+            }
+          }
+        }
+      } else {
+        $stmt = $pdo->prepare(
+          'INSERT INTO blogs (image_path, heading, banner_description, author_name, content, created_at)
+           VALUES (:image_path, :heading, :banner_description, :author_name, :content, NOW())'
+        );
+        $stmt->execute([
+          ':image_path'          => $imagePath,
+          ':heading'             => $heading,
+          ':banner_description'  => $bannerDescription,
+          ':author_name'         => $authorName,
+          ':content'             => $content,
+        ]);
+
+        $success = 'Your Blog has been added successfully.';
+        $heading = $bannerDescription = $authorName = $content = '';
+        $currentImagePath = '';
+        $editingId = 0;
+        $isEditing = false;
+      }
     }
   } catch (Throwable $e) {
     error_log('Add blog failure: ' . $e->getMessage());
-    $errors[] = 'An unexpected error occurred while saving the blog entry.';
+    $errors[] = $isEditing
+      ? 'An unexpected error occurred while updating the blog entry.'
+      : 'An unexpected error occurred while saving the blog entry.';
+
+    if (isset($newImageAbsolutePath) && $newImageAbsolutePath && is_file($newImageAbsolutePath)) {
+      @unlink($newImageAbsolutePath);
+    }
+  }
+} else {
+  $editingId = (int)($_GET['id'] ?? 0);
+  if ($editingId > 0 && !$errors) {
+    try {
+      $existingBlog = add_blogs_find_blog($pdo, $editingId);
+    } catch (Throwable $fetchError) {
+      error_log('Failed to load blog for editing: ' . $fetchError->getMessage());
+      $existingBlog = null;
+    }
+
+    if ($existingBlog) {
+      $isEditing = true;
+      $heading = (string)($existingBlog['heading'] ?? '');
+      $bannerDescription = (string)($existingBlog['banner_description'] ?? '');
+      $authorName = (string)($existingBlog['author_name'] ?? '');
+      $content = (string)($existingBlog['content'] ?? '');
+      $currentImagePath = (string)($existingBlog['image_path'] ?? '');
+    } else {
+      $errors[] = 'The requested blog could not be found or may have been removed.';
+    }
   }
 }
 
-render_head('Add Blogs');
+$pageTitle = $isEditing ? 'Edit Blog' : 'Add Blogs';
+$pageDescription = $isEditing
+  ? 'Update an existing blog entry and keep your content up to date.'
+  : 'Create a new blog entry for the website.';
+$resetFormOnSuccess = $success !== null && !$isEditing;
+
+render_head($pageTitle);
 echo '<div class="container-fluid layout">';
 echo '<div class="row g-0">';
 render_sidebar('add-blogs');
@@ -137,13 +279,21 @@ render_sidebar('add-blogs');
 <main class="col-12 col-md-9 col-lg-10 content">
   <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
     <div>
-      <h2 class="title-heading">Add Blogs</h2>
-      <p class="para mb-0">Create a new blog entry for the website.</p>
+      <h2 class="title-heading"><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></h2>
+      <p class="para mb-0"><?= htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8') ?></p>
     </div>
   </div>
 
+  <?php if ($isEditing && $editingId > 0): ?>
+    <div class="alert alert-info" role="alert">
+      You are editing blog #<?= htmlspecialchars((string)$editingId, ENT_QUOTES, 'UTF-8') ?>.
+      <a href="all_blogs.php" class="alert-link">View all blogs</a>
+      or <a href="add_blogs.php" class="alert-link">create a new blog entry</a> instead.
+    </div>
+  <?php endif; ?>
+
   <?php if ($success): ?>
-    <div class="alert alert-success fade show" role="alert" id="blog-success-alert">
+    <div class="alert alert-success fade show" role="alert" id="blog-success-alert"<?php if ($resetFormOnSuccess): ?> data-reset-form="1"<?php endif; ?>>
       <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
     </div>
   <?php endif; ?>
@@ -161,9 +311,27 @@ render_sidebar('add-blogs');
   <div class="box">
     <form method="post" enctype="multipart/form-data" class="row g-3" id="add-blog-form">
       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+      <input type="hidden" name="blog_id" value="<?= htmlspecialchars($isEditing ? (string)$editingId : '', ENT_QUOTES, 'UTF-8') ?>">
       <div class="col-12">
-        <label for="image" class="form-label">Upload Blog Images</label>
-        <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+        <label for="image" class="form-label">Blog Image</label>
+        <input type="file" class="form-control" id="image" name="image" accept="image/*"<?php if (!$isEditing): ?> required<?php endif; ?>>
+        <div class="form-text">
+          <?php if ($isEditing): ?>
+            Upload a new image to replace the existing one. Leave this field empty to keep the current image.
+          <?php else: ?>
+            Upload a featured image for the blog post.
+          <?php endif; ?>
+        </div>
+        <?php if ($isEditing): ?>
+          <div class="small text-muted mt-1">
+            <?php if ($currentImagePath !== ''): ?>
+              Current image:
+              <a href="<?= htmlspecialchars($currentImagePath, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">View</a>
+            <?php else: ?>
+              This blog does not currently have an image.
+            <?php endif; ?>
+          </div>
+        <?php endif; ?>
       </div>
       <div class="col-12 col-md-6">
         <label for="heading" class="form-label">Blog Heading</label>
@@ -183,8 +351,11 @@ render_sidebar('add-blogs');
         <div class="form-text">Use the editor to format headings, links, images, and more.</div>
       </div>
       <div class="col-12">
-        <div class="text-end">
-          <button type="submit" class="btn btn-primary">Submit Blog</button>
+        <div class="d-flex justify-content-end gap-2">
+          <?php if ($isEditing): ?>
+            <a href="add_blogs.php" class="btn btn-outline-secondary">Cancel Editing</a>
+          <?php endif; ?>
+          <button type="submit" class="btn btn-primary"><?= $isEditing ? 'Update Blog' : 'Submit Blog' ?></button>
         </div>
       </div>
     </form>
@@ -242,25 +413,29 @@ echo '</div>';
     }
 
     const form = document.getElementById('add-blog-form');
-    if (form) {
-      form.reset();
-    }
+    const shouldReset = alertBox.getAttribute('data-reset-form') === '1';
 
-    const resetEditor = editor => {
-      if (editor && typeof editor.setData === 'function') {
-        editor.setData('');
+    if (shouldReset) {
+      if (form) {
+        form.reset();
       }
-      const textarea = document.getElementById('content');
-      if (textarea) {
-        textarea.value = '';
-      }
-    };
 
-    if (window.blogEditorInstance) {
-      resetEditor(window.blogEditorInstance);
-    } else {
-      window.blogEditorReadyQueue = window.blogEditorReadyQueue || [];
-      window.blogEditorReadyQueue.push(resetEditor);
+      const resetEditor = editor => {
+        if (editor && typeof editor.setData === 'function') {
+          editor.setData('');
+        }
+        const textarea = document.getElementById('content');
+        if (textarea) {
+          textarea.value = '';
+        }
+      };
+
+      if (window.blogEditorInstance) {
+        resetEditor(window.blogEditorInstance);
+      } else {
+        window.blogEditorReadyQueue = window.blogEditorReadyQueue || [];
+        window.blogEditorReadyQueue.push(resetEditor);
+      }
     }
 
     window.setTimeout(() => {

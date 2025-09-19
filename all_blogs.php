@@ -16,8 +16,6 @@ if (!is_authenticated()) {
 $pdo = db();
 $error = null;
 $blogs = [];
-$formErrors = [];
-$prefillData = null;
 
 $successMessage = $_SESSION['blog_success'] ?? null;
 unset($_SESSION['blog_success']);
@@ -45,155 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $error === null) {
   csrf_check($_POST['csrf'] ?? '');
   $action = (string)($_POST['action'] ?? '');
 
-  if ($action === 'update') {
-    rl_hit('update-blog', 20);
-
-    $blogId = (int)($_POST['blog_id'] ?? 0);
-    $heading = trim((string)($_POST['heading'] ?? ''));
-    $bannerDescription = trim((string)($_POST['banner_description'] ?? ''));
-    $authorName = trim((string)($_POST['author_name'] ?? ''));
-    $content = trim((string)($_POST['content'] ?? ''));
-
-    $existingBlog = null;
-    if ($blogId <= 0) {
-      $formErrors[] = 'Invalid blog selected.';
-    } else {
-      try {
-        $stmt = $pdo->prepare('SELECT * FROM blogs WHERE id = :id');
-        $stmt->execute([':id' => $blogId]);
-        $existingBlog = $stmt->fetch();
-        if (!$existingBlog) {
-          $formErrors[] = 'The selected blog could not be found.';
-        }
-      } catch (Throwable $e) {
-        error_log('Failed to load blog for editing: ' . $e->getMessage());
-        $formErrors[] = 'Unable to load the blog for editing. Please try again.';
-      }
-    }
-
-    if ($heading === '') {
-      $formErrors[] = 'Blog Heading is required.';
-    }
-    if ($bannerDescription === '') {
-      $formErrors[] = 'Blog Banner Description is required.';
-    }
-    if ($authorName === '') {
-      $formErrors[] = 'Author Name is required.';
-    }
-    if ($content === '') {
-      $formErrors[] = 'Blog Details content is required.';
-    }
-
-    $newImagePath = $existingBlog['image_path'] ?? '';
-    $oldImageToDelete = null;
-    $newImageAbsolutePath = null;
-
-    if (!$formErrors && $existingBlog) {
-      $file = $_FILES['image'] ?? null;
-      if ($file && ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-        if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-          $formErrors[] = 'There was a problem uploading the image. Please try again.';
-        } else {
-          $tmpName = (string)($file['tmp_name'] ?? '');
-          if (!is_uploaded_file($tmpName)) {
-            $formErrors[] = 'Invalid upload received.';
-          } else {
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime = $finfo ? finfo_file($finfo, $tmpName) : null;
-            if ($finfo) {
-              finfo_close($finfo);
-            }
-            $allowed = [
-              'image/jpeg' => 'jpg',
-              'image/png'  => 'png',
-              'image/gif'  => 'gif',
-              'image/webp' => 'webp',
-            ];
-            if (!isset($allowed[$mime ?? ''])) {
-              $formErrors[] = 'Only JPEG, PNG, GIF, or WEBP images are allowed.';
-            } else {
-              $uploadDir = __DIR__ . '/assets/uploads/blogs';
-              if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
-                $formErrors[] = 'Unable to prepare the upload directory.';
-              } else {
-                try {
-                  $safeName = bin2hex(random_bytes(8));
-                } catch (Throwable $e) {
-                  error_log('Failed to generate image filename: ' . $e->getMessage());
-                  $formErrors[] = 'Unable to process the uploaded image. Please try again.';
-                  $safeName = null;
-                }
-                if ($safeName) {
-                  $targetPath = $uploadDir . '/' . $safeName . '.' . $allowed[$mime];
-                  if (!move_uploaded_file($tmpName, $targetPath)) {
-                    $formErrors[] = 'Failed to save the uploaded image.';
-                  } else {
-                    $newImagePath = 'assets/uploads/blogs/' . $safeName . '.' . $allowed[$mime];
-                    $oldImageToDelete = (string)($existingBlog['image_path'] ?? '');
-                    $newImageAbsolutePath = $targetPath;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (!$formErrors && $existingBlog) {
-      try {
-        $stmt = $pdo->prepare(
-          'UPDATE blogs
-             SET image_path = :image_path,
-                 heading = :heading,
-                 banner_description = :banner_description,
-                 author_name = :author_name,
-                 content = :content
-           WHERE id = :id'
-        );
-        $stmt->execute([
-          ':image_path'         => $newImagePath,
-          ':heading'            => $heading,
-          ':banner_description' => $bannerDescription,
-          ':author_name'        => $authorName,
-          ':content'            => $content,
-          ':id'                 => $blogId,
-        ]);
-
-        if ($oldImageToDelete) {
-          $uploadsDir = realpath(__DIR__ . '/assets/uploads/blogs');
-          $oldImageFull = __DIR__ . '/' . ltrim($oldImageToDelete, '/');
-          if ($uploadsDir && is_file($oldImageFull)) {
-            $oldImageReal = realpath($oldImageFull);
-            if ($oldImageReal && strncmp($oldImageReal, $uploadsDir, strlen($uploadsDir)) === 0) {
-              @unlink($oldImageReal);
-            }
-          }
-        }
-
-        $_SESSION['blog_success'] = 'Blog updated successfully.';
-        header('Location: all_blogs.php');
-        exit;
-      } catch (Throwable $e) {
-        error_log('Failed to update blog: ' . $e->getMessage());
-        $formErrors[] = 'An unexpected error occurred while updating the blog.';
-        if ($newImageAbsolutePath && is_file($newImageAbsolutePath)) {
-          @unlink($newImageAbsolutePath);
-        }
-      }
-    }
-
-    if ($formErrors) {
-      $prefillData = [
-        'id'                 => $blogId,
-        'heading'            => $heading,
-        'banner_description' => $bannerDescription,
-        'author_name'        => $authorName,
-        'content'            => $content,
-        'image_path'         => (string)($existingBlog['image_path'] ?? ''),
-      ];
-    }
-  } elseif ($action === 'delete') {
+  if ($action === 'delete') {
     rl_hit('delete-blog', 20);
     $blogId = (int)($_POST['blog_id'] ?? 0);
 
@@ -234,7 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $error === null) {
     header('Location: all_blogs.php');
     exit;
   } else {
-    $formErrors[] = 'Unsupported action requested.';
+    $_SESSION['blog_error'] = 'Unsupported action requested.';
+    header('Location: all_blogs.php');
+    exit;
   }
 }
 
@@ -305,7 +157,7 @@ render_sidebar('all-blogs');
   <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
     <div>
       <h2 class="title-heading">All Blogs</h2>
-      <p class="para mb-0">Review existing blog posts and manage their content.</p>
+      <p class="para mb-0">Review existing blog posts, edit them through the Add Blogs form, and manage their content.</p>
     </div>
   </div>
 
@@ -327,63 +179,9 @@ render_sidebar('all-blogs');
     </div>
   <?php endif; ?>
 
-  <div class="box mb-4">
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
-      <h3 class="h5 mb-0">Edit Blog</h3>
-      <span class="badge text-bg-light">Updates are saved instantly after submission.</span>
-    </div>
-
-    <?php if ($formErrors): ?>
-      <div class="alert alert-danger" role="alert">
-        <ul class="mb-0">
-          <?php foreach ($formErrors as $formError): ?>
-            <li><?= htmlspecialchars((string)$formError, ENT_QUOTES, 'UTF-8') ?></li>
-          <?php endforeach; ?>
-        </ul>
-      </div>
-    <?php endif; ?>
-
-    <p class="text-muted small mb-3" id="edit-blog-helper">
-      Select a blog from the table below and click &ldquo;Edit&rdquo; to load its details.
-    </p>
-
-    <form method="post" enctype="multipart/form-data" class="row g-3" id="edit-blog-form">
-      <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
-      <input type="hidden" name="action" value="update">
-      <input type="hidden" name="blog_id" id="edit-blog-id" value="">
-
-      <div class="col-12">
-        <label for="edit-blog-image" class="form-label">Blog Image</label>
-        <input type="file" class="form-control" id="edit-blog-image" name="image" accept="image/*">
-        <div class="form-text">Leave empty to keep the current image.</div>
-        <div class="small text-muted mt-1" id="current-image-preview"></div>
-      </div>
-
-      <div class="col-12 col-md-6">
-        <label for="edit-blog-heading" class="form-label">Blog Heading</label>
-        <input type="text" class="form-control" id="edit-blog-heading" name="heading" value="" required>
-      </div>
-
-      <div class="col-12 col-md-6">
-        <label for="edit-blog-author" class="form-label">Author Name</label>
-        <input type="text" class="form-control" id="edit-blog-author" name="author_name" value="" required>
-      </div>
-
-      <div class="col-12">
-        <label for="edit-blog-banner" class="form-label">Blog Banner Description</label>
-        <textarea class="form-control" id="edit-blog-banner" name="banner_description" rows="3" required></textarea>
-      </div>
-
-      <div class="col-12">
-        <label for="edit-blog-content" class="form-label">Blog Details</label>
-        <textarea class="form-control" id="edit-blog-content" name="content" rows="8" required></textarea>
-      </div>
-
-      <div class="col-12 d-flex justify-content-end gap-2">
-        <button type="button" class="btn btn-outline-secondary" id="edit-blog-cancel">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="edit-blog-submit">Update Blog</button>
-      </div>
-    </form>
+  <div class="alert alert-info" role="alert">
+    To edit an existing blog entry, open it in the
+    <a href="add_blogs.php" class="alert-link">Add Blogs</a> form and update the content from there.
   </div>
 
   <div class="box">
@@ -434,13 +232,11 @@ render_sidebar('all-blogs');
                 <td class="text-nowrap"><?= htmlspecialchars($formattedDate, ENT_QUOTES, 'UTF-8') ?></td>
                 <td>
                   <div class="d-flex gap-2">
-                    <button type="button"
-                            class="btn btn-sm btn-outline-primary"
-                            title="Edit blog"
-                            data-edit-blog="1"
-                            data-blog-id="<?= htmlspecialchars((string)$blogId, ENT_QUOTES, 'UTF-8') ?>">
+                    <a class="btn btn-sm btn-outline-primary"
+                       href="add_blogs.php?id=<?= htmlspecialchars((string)$blogId, ENT_QUOTES, 'UTF-8') ?>"
+                       title="Edit blog">
                       <i class="bi bi-pencil-square"></i>
-                    </button>
+                    </a>
                     <button type="button"
                             class="btn btn-sm btn-outline-danger"
                             title="Delete blog"
@@ -469,150 +265,15 @@ render_sidebar('all-blogs');
 </form>
 <?php
 $blogsJson = json_encode($blogsForJson, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
-$prefillJson = $prefillData
-  ? json_encode(
-      [
-        'id'                 => (int)($prefillData['id'] ?? 0),
-        'heading'            => (string)($prefillData['heading'] ?? ''),
-        'banner_description' => (string)($prefillData['banner_description'] ?? ''),
-        'author_name'        => (string)($prefillData['author_name'] ?? ''),
-        'content'            => (string)($prefillData['content'] ?? ''),
-        'image_path'         => (string)($prefillData['image_path'] ?? ''),
-      ],
-      JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
-    )
-  : 'null';
 ?>
 <script>
   window.allBlogsData = <?= $blogsJson ?: '[]' ?>;
-  window.blogServerPrefill = <?= $prefillJson ?>;
 </script>
 <script>
   (function () {
-    const form = document.getElementById('edit-blog-form');
-    if (!form) {
-      return;
-    }
-
-    const fields = {
-      id: document.getElementById('edit-blog-id'),
-      image: document.getElementById('edit-blog-image'),
-      heading: document.getElementById('edit-blog-heading'),
-      author: document.getElementById('edit-blog-author'),
-      banner: document.getElementById('edit-blog-banner'),
-      content: document.getElementById('edit-blog-content'),
-    };
-    const submitBtn = document.getElementById('edit-blog-submit');
-    const cancelBtn = document.getElementById('edit-blog-cancel');
-    const helper = document.getElementById('edit-blog-helper');
-    const currentImage = document.getElementById('current-image-preview');
     const deleteForm = document.getElementById('delete-blog-form');
     const deleteId = document.getElementById('delete-blog-id');
-    let activeRow = null;
-
     const blogsData = Array.isArray(window.allBlogsData) ? window.allBlogsData : [];
-
-    const setFormEnabled = enabled => {
-      const elements = [fields.image, fields.heading, fields.author, fields.banner, fields.content, submitBtn, cancelBtn];
-      elements.forEach(el => {
-        if (!el) {
-          return;
-        }
-        if (enabled) {
-          el.removeAttribute('disabled');
-        } else {
-          el.setAttribute('disabled', 'disabled');
-        }
-      });
-    };
-
-    const clearActiveRow = () => {
-      if (activeRow) {
-        activeRow.classList.remove('table-active');
-        activeRow = null;
-      }
-    };
-
-    const showCurrentImage = imagePath => {
-      if (!currentImage) {
-        return;
-      }
-      const value = (imagePath || '').toString().trim();
-      if (value === '') {
-        currentImage.textContent = 'No image selected.';
-        return;
-      }
-      const encoded = encodeURI(value);
-      currentImage.innerHTML = `Current image: <a href="${encoded}" target="_blank" rel="noopener">View</a>`;
-    };
-
-    const updateHelper = blogId => {
-      if (!helper) {
-        return;
-      }
-      if (blogId) {
-        helper.textContent = `Editing blog #${blogId}. Update the fields and submit to save changes.`;
-      } else {
-        helper.textContent = 'Select a blog from the table below and click “Edit” to load its details.';
-      }
-    };
-
-    const populateForm = blog => {
-      if (!blog) {
-        return;
-      }
-      setFormEnabled(true);
-      if (fields.id) fields.id.value = blog.id || '';
-      if (fields.heading) fields.heading.value = blog.heading || '';
-      if (fields.author) fields.author.value = blog.author_name || '';
-      if (fields.banner) fields.banner.value = blog.banner_description || '';
-      if (fields.content) fields.content.value = blog.content || '';
-      if (fields.image) fields.image.value = '';
-      showCurrentImage(blog.image_path || '');
-      updateHelper(blog.id);
-
-      clearActiveRow();
-      const row = document.querySelector(`tr[data-blog-id="${blog.id}"]`);
-      if (row) {
-        row.classList.add('table-active');
-        activeRow = row;
-      }
-
-      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
-
-    const resetForm = () => {
-      form.reset();
-      if (fields.id) fields.id.value = '';
-      showCurrentImage('');
-      setFormEnabled(false);
-      updateHelper('');
-      clearActiveRow();
-    };
-
-    setFormEnabled(false);
-    showCurrentImage('');
-    updateHelper('');
-
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', event => {
-        event.preventDefault();
-        resetForm();
-      });
-    }
-
-    document.querySelectorAll('[data-edit-blog="1"]').forEach(button => {
-      button.addEventListener('click', () => {
-        const blogId = parseInt(button.getAttribute('data-blog-id') || '', 10);
-        if (!blogId) {
-          return;
-        }
-        const blog = blogsData.find(item => Number(item.id) === blogId);
-        if (blog) {
-          populateForm(blog);
-        }
-      });
-    });
 
     document.querySelectorAll('[data-delete-blog="1"]').forEach(button => {
       button.addEventListener('click', () => {
@@ -630,10 +291,6 @@ $prefillJson = $prefillData
         deleteForm.submit();
       });
     });
-
-    if (window.blogServerPrefill) {
-      populateForm(window.blogServerPrefill);
-    }
 
     const alertBox = document.getElementById('blog-operation-alert');
     if (alertBox) {
