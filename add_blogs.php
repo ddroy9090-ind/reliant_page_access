@@ -183,7 +183,9 @@ render_sidebar('add-blogs');
         <div class="form-text">Use the editor to format headings, links, images, and more.</div>
       </div>
       <div class="col-12">
-        <button type="submit" class="btn btn-primary">Submit Blog</button>
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary">Submit Blog</button>
+        </div>
       </div>
     </form>
   </div>

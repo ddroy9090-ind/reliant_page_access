@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3306
--- Generation Time: Sep 19, 2025 at 06:53 AM
--- Server version: 11.8.3-MariaDB-log
--- PHP Version: 7.2.34
+-- Host: 127.0.0.1:3307
+-- Generation Time: Sep 19, 2025 at 11:54 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `u431421769_certifications`
+-- Database: `certificate`
 --
 
 -- --------------------------------------------------------

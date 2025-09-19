@@ -37,7 +37,7 @@ function render_sidebar(string $active): void
     'logs'      => ['href' => 'page_access_logs.php', 'icon' => 'bi-universal-access-circle',       'label' => 'Page Access Logs'],
     'analytics' => ['href' => 'analytics_dashboard.php', 'icon' => 'bi-graph-up-arrow', 'label' => 'Analytics Dashboard'],
     'contact-form' => ['href' => 'contact_form_submissions.php', 'icon' => 'bi-person-rolodex', 'label' => 'Contact Submissions'],
-    'popup-form' => ['href' => 'popup_form_submissions.php', 'icon' => 'bi-person-rolodex', 'label' => 'Popup Submissions'],
+    'popup-form' => ['href' => 'popup_form_submissions.php', 'icon' => 'bi-database', 'label' => 'Popup Submissions'],
     'add-blogs' => ['href' => 'add_blogs.php', 'icon' => 'bi-journal-plus', 'label' => 'Add Blogs'],
   ];
 
