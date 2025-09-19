@@ -38,8 +38,8 @@ function render_sidebar(string $active): void
     'analytics' => ['href' => 'analytics_dashboard.php', 'icon' => 'bi-graph-up-arrow', 'label' => 'Analytics Dashboard'],
     'contact-form' => ['href' => 'contact_form_submissions.php', 'icon' => 'bi-person-rolodex', 'label' => 'Contact Submissions'],
     'popup-form' => ['href' => 'popup_form_submissions.php', 'icon' => 'bi-database', 'label' => 'Popup Submissions'],
-    'all-blogs' => ['href' => 'all_blogs.php', 'icon' => 'bi-journal-text', 'label' => 'All Blogs'],
     'add-blogs' => ['href' => 'add_blogs.php', 'icon' => 'bi-journal-plus', 'label' => 'Add Blogs'],
+    'all-blogs' => ['href' => 'all_blogs.php', 'icon' => 'bi-journal-text', 'label' => 'All Blogs'],
   ];
 
   echo '<aside class="col-12 col-md-3 col-lg-2 sidebar p-3">';
