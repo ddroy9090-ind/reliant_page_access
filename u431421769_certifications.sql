@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 19, 2025 at 05:20 AM
+-- Generation Time: Sep 19, 2025 at 06:53 AM
 -- Server version: 11.8.3-MariaDB-log
 -- PHP Version: 7.2.34
 
@@ -99,7 +99,8 @@ CREATE TABLE `enquiries` (
 
 INSERT INTO `enquiries` (`id`, `name`, `email`, `phone`, `company`, `ip_address`, `created_at`) VALUES
 (1, 'Shoaib Ahmad', 'shoaib@reliantsurveyors.com', '08400438136', 'Office Report testing', '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', '2025-09-19 05:11:22'),
-(2, 'Rehman Shoaib', 'shoaib@reliantsurveyors.com', '8400438136', 'Demo Testing', '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', '2025-09-19 05:13:14');
+(2, 'Rehman Shoaib', 'shoaib@reliantsurveyors.com', '8400438136', 'Demo Testing', '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', '2025-09-19 05:13:14'),
+(3, 'Home Page', 'surveyor@gmail.com', '08400438136', 'Reliant', '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', '2025-09-19 05:48:25');
 
 -- --------------------------------------------------------
 
@@ -2942,7 +2943,276 @@ INSERT INTO `page_access_logs` (`id`, `ip_address`, `user_agent`, `referer`, `re
 (2806, '52.167.144.213', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/vendors/wow/assets/icons/about-us.php', '2025-09-19 05:16:22', NULL, NULL),
 (2807, '185.39.19.43', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/', '/', '2025-09-19 05:17:10', NULL, NULL),
 (2808, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/contact', '/blogs', '2025-09-19 05:18:21', NULL, NULL),
-(2809, '40.77.167.151', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/automobile/assets/market-reports/assets/market-reports/assets/images/svg/header/plant-and-machinery.php', '2025-09-19 05:19:15', NULL, NULL);
+(2809, '40.77.167.151', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/automobile/assets/market-reports/assets/market-reports/assets/images/svg/header/plant-and-machinery.php', '2025-09-19 05:19:15', NULL, NULL),
+(2810, '52.167.144.215', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/images/svg/header/assets/icons/assets/images/about/market-reports/student-accommodation.php', '2025-09-19 05:22:23', NULL, NULL),
+(2811, '40.77.167.255', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/images/logo/assets/icons/assets/market-reports/images/about/q1-2025-dubai-real-estate-report.php', '2025-09-19 05:29:56', NULL, NULL),
+(2812, '40.77.167.23', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/images/svg/header/assets/icons/assets/vendors/youtube-popup/vendors/owl/images/logo/card-icons/market-reports/student-accommodation.php', '2025-09-19 05:30:02', NULL, NULL),
+(2813, '40.77.167.255', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/assets/market-reports/assets/images/logo/assets/images/social-icons/market-and-research.png', '2025-09-19 05:30:57', NULL, NULL),
+(2814, '2a01:4ff:f0:8ce::1', 'Mozilla/5.0 (compatible; monitoring360bot/1.1; +https://app.360monitoring.com/bot.html)', '', '/', '2025-09-19 05:32:02', NULL, NULL),
+(2815, '40.77.167.24', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/joomla-pages/assets/market-reports/assets/market-reports/assets/images/about/healthcare.php', '2025-09-19 05:39:07', NULL, NULL),
+(2816, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '', '/', '2025-09-19 05:40:59', NULL, NULL),
+(2817, '66.249.79.2', 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.127 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', '', '/', '2025-09-19 05:42:01', NULL, NULL),
+(2818, '40.77.167.24', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/assets/market-reports/assets/images/svg/header/assets/images/background/research.php', '2025-09-19 05:42:19', NULL, NULL),
+(2819, '40.77.167.143', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/vendors/slick/assets/icons/assets/icons/market-reports/js/images/social-icons/building-and-project-consultancy.php', '2025-09-19 05:43:24', NULL, NULL),
+(2820, '52.45.77.169', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Amazonbot/0.1; +https://developer.amazon.com/support/amazonbot) Chrome/119.0.6045.214 Safari/537.36', '', '/heritage-property-valuation', '2025-09-19 05:43:59', NULL, NULL),
+(2821, '185.39.19.97', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/', '/', '2025-09-19 05:45:58', NULL, NULL),
+(2822, '98.83.226.125', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Amazonbot/0.1; +https://developer.amazon.com/support/amazonbot) Chrome/119.0.6045.214 Safari/537.36', '', '/sustainability', '2025-09-19 05:47:26', NULL, NULL),
+(2823, '54.236.1.13', 'Mozilla/5.0 (compatible; Pinterestbot/1.0; +http://www.pinterest.com/bot.html)', '', '/en-ae', '2025-09-19 05:49:00', NULL, NULL),
+(2824, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '', '/', '2025-09-19 05:49:42', NULL, NULL),
+(2825, '40.77.167.143', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/assets/img/home4/assets/market-reports/assets/market-reports/mission-vision-and-value.php', '2025-09-19 05:49:55', NULL, NULL),
+(2826, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://hpanel.hostinger.com/', '/', '2025-09-19 05:51:26', NULL, NULL),
+(2827, '2001:41d0:303:58e5::1', 'Mozilla/5.0 (compatible; MJ12bot/v1.4.8; http://mj12bot.com/)', '', '/', '2025-09-19 05:51:32', NULL, NULL),
+(2828, '40.77.167.143', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/automobile/assets/market-reports/assets/images/background/assets/images/social-icons/location.png', '2025-09-19 05:52:26', NULL, NULL),
+(2829, '42.236.101.242', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36; 360Spider', 'https://www.reliantsurveyors.com/', '/', '2025-09-19 05:53:09', NULL, NULL),
+(2830, '42.236.17.20', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36; 360Spider', 'https://www.reliantsurveyors.com/', '/', '2025-09-19 05:54:27', NULL, NULL),
+(2831, '40.77.167.156', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/vendors/jquery-lettering/assets/vendors/circleGraph/residential.php', '2025-09-19 05:57:18', NULL, NULL),
+(2832, '40.77.167.156', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/insurance/assets/icons/assets/icons/mail.php', '2025-09-19 05:57:49', NULL, NULL),
+(2833, '35.217.47.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0', '', '/', '2025-09-19 05:57:51', NULL, NULL),
+(2834, '37.59.22.99', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36', '', '/', '2025-09-19 06:01:26', NULL, NULL),
+(2835, '40.77.167.156', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/assets/market-reports/assets/images/logo/assets/icons/q2-residential-report.php', '2025-09-19 06:01:52', NULL, NULL),
+(2836, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:54', NULL, NULL),
+(2837, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:54', NULL, NULL),
+(2838, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/student-accommodation', '2025-09-19 06:01:55', NULL, NULL),
+(2839, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:55', NULL, NULL),
+(2840, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:55', NULL, NULL),
+(2841, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:55', NULL, NULL),
+(2842, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/hospitality-leisure', '2025-09-19 06:01:55', NULL, NULL),
+(2843, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/services', '2025-09-19 06:01:55', NULL, NULL),
+(2844, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/hospitality-leisure', '2025-09-19 06:01:55', NULL, NULL),
+(2845, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/careers', '2025-09-19 06:01:55', NULL, NULL),
+(2846, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/services', '2025-09-19 06:01:55', NULL, NULL),
+(2847, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/office-business-space', '2025-09-19 06:01:55', NULL, NULL),
+(2848, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/building-and-project-consultancy', '2025-09-19 06:01:56', NULL, NULL),
+(2849, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/office-business-space', '2025-09-19 06:01:56', NULL, NULL),
+(2850, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:56', NULL, NULL),
+(2851, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/building-and-project-consultancy', '2025-09-19 06:01:56', NULL, NULL),
+(2852, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/research-manager', '2025-09-19 06:01:56', NULL, NULL),
+(2853, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/research', '2025-09-19 06:01:56', NULL, NULL),
+(2854, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/cookie-policy', '2025-09-19 06:01:56', NULL, NULL),
+(2855, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:56', NULL, NULL),
+(2856, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/valuation-and-professional-advisory', '2025-09-19 06:01:56', NULL, NULL),
+(2857, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/contact', '2025-09-19 06:01:56', NULL, NULL),
+(2858, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:56', NULL, NULL),
+(2859, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:57', NULL, NULL),
+(2860, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/strategic-consultancy', '2025-09-19 06:01:57', NULL, NULL),
+(2861, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/surveyor-residential-valuation', '2025-09-19 06:01:57', NULL, NULL),
+(2862, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/strategic-advisory-and-valuations', '2025-09-19 06:01:57', NULL, NULL),
+(2863, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/blogs', '2025-09-19 06:01:57', NULL, NULL),
+(2864, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/research', '2025-09-19 06:01:58', NULL, NULL),
+(2865, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/contact', '2025-09-19 06:01:58', NULL, NULL),
+(2866, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/valuation-and-professional-advisory', '2025-09-19 06:01:58', NULL, NULL),
+(2867, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/', '2025-09-19 06:01:59', NULL, NULL),
+(2868, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/contact', '2025-09-19 06:01:59', NULL, NULL),
+(2869, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/careers', '2025-09-19 06:01:59', NULL, NULL),
+(2870, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/about-reliant-consultancy-group', '2025-09-19 06:01:59', NULL, NULL),
+(2871, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/about-reliant-consultancy-group', '2025-09-19 06:01:59', NULL, NULL),
+(2872, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/trade-specialist-sectors', '2025-09-19 06:01:59', NULL, NULL),
+(2873, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/market-research-and-reports', '2025-09-19 06:02:00', NULL, NULL),
+(2874, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/people', '2025-09-19 06:02:00', NULL, NULL),
+(2875, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/people', '2025-09-19 06:02:00', NULL, NULL),
+(2876, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/contact', '2025-09-19 06:02:01', NULL, NULL),
+(2877, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/strategic-advisory-and-valuations', '2025-09-19 06:02:01', NULL, NULL),
+(2878, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/uae-services', '2025-09-19 06:02:01', NULL, NULL),
+(2879, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/retail', '2025-09-19 06:02:02', NULL, NULL),
+(2880, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/residential', '2025-09-19 06:02:02', NULL, NULL),
+(2881, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/healthcare', '2025-09-19 06:02:02', NULL, NULL),
+(2882, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/buying-and-selling', '2025-09-19 06:02:02', NULL, NULL),
+(2883, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/terms-and-conditions', '2025-09-19 06:02:02', NULL, NULL),
+(2884, '2a01:4ff:f0:8ce::1', 'Mozilla/5.0 (compatible; monitoring360bot/1.1; +https://app.360monitoring.com/bot.html)', '', '/', '2025-09-19 06:02:02', NULL, NULL),
+(2885, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/commercial', '2025-09-19 06:02:03', NULL, NULL),
+(2886, '54.198.55.229', 'Mozilla/5.0 (compatible)', '', '/project-marketing-consultancy', '2025-09-19 06:02:03', NULL, NULL),
+(2887, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/office-business-space', '2025-09-19 06:02:03', NULL, NULL),
+(2888, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/en-ae', '2025-09-19 06:02:03', NULL, NULL),
+(2889, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/terms-and-conditions', '2025-09-19 06:02:04', NULL, NULL),
+(2890, '54.156.251.192', 'Mozilla/5.0 (compatible)', '', '/plant-and-machinery', '2025-09-19 06:02:11', NULL, NULL),
+(2891, '34.235.48.77', 'Mozilla/5.0 (compatible)', '', '/building-and-project-consultancy', '2025-09-19 06:02:13', NULL, NULL),
+(2892, '52.167.144.146', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/images/logo/assets/icons/assets/icons/market-reports/contact.php', '2025-09-19 06:03:29', NULL, NULL),
+(2893, '40.77.167.5', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/automobile/assets/market-reports/assets/market-reports/assets/images/svg/header/q2-residential-report.php', '2025-09-19 06:03:56', NULL, NULL),
+(2894, '40.77.167.156', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/js/assets/market-reports/en-ae.php', '2025-09-19 06:05:20', NULL, NULL),
+(2895, '52.167.144.146', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/images/logo/assets/icons/assets/images/background/market-reports/buying-and-selling.php', '2025-09-19 06:05:49', NULL, NULL),
+(2896, '52.167.144.146', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/assets/img/home4/assets/images/background/mission-vision-and-value.php', '2025-09-19 06:06:01', NULL, NULL),
+(2897, '35.217.47.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0', '', '/', '2025-09-19 06:06:38', NULL, NULL),
+(2898, '106.49.60.184', 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.8087.1901 Mobile Safari/537.36', '', '/careers', '2025-09-19 06:08:38', NULL, NULL),
+(2899, '66.249.79.3', 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.127 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', '', '/about-us', '2025-09-19 06:14:45', NULL, NULL),
+(2900, '2.58.178.181', 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.6754.1391 Mobile Safari/537.36', '', '/hospitality-leisure', '2025-09-19 06:16:26', NULL, NULL),
+(2901, '121.91.176.116', 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.8842.1649 Mobile Safari/537.36', '', '/commercial', '2025-09-19 06:16:31', NULL, NULL),
+(2902, '40.77.167.27', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/vendors/slick/assets/icons/assets/icons/market-reports/card-icons/images/about/sustainability.php', '2025-09-19 06:20:11', NULL, NULL),
+(2903, '2a01:4ff:f0:8ce::1', 'Mozilla/5.0 (compatible; monitoring360bot/1.1; +https://app.360monitoring.com/bot.html)', '', '/', '2025-09-19 06:22:32', NULL, NULL),
+(2904, '18.97.9.99', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; PerplexityBot/1.0; +https://perplexity.ai/perplexitybot)', '', '/', '2025-09-19 06:24:23', NULL, NULL),
+(2905, '51.68.111.214', 'Mozilla/5.0 (compatible; MJ12bot/v2.0.4; http://mj12bot.com/)', '', '/', '2025-09-19 06:24:30', NULL, NULL),
+(2906, '40.77.167.9', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/assets/market-reports/assets/images/logo/assets/icons/services.php', '2025-09-19 06:29:52', NULL, NULL),
+(2907, '42.236.17.8', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36; 360Spider', 'https://www.reliantsurveyors.com/', '/', '2025-09-19 06:30:21', NULL, NULL),
+(2908, '40.77.167.9', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/images/logo/assets/icons/assets/vendors/odometer/images/about/images/background/market-reports/building-and-project-consultancy.php', '2025-09-19 06:32:02', NULL, NULL),
+(2909, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', '', '/', '2025-09-19 06:33:31', NULL, NULL),
+(2910, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', '', '/', '2025-09-19 06:33:32', NULL, NULL),
+(2911, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/contact.php', '/contact', '2025-09-19 06:33:34', NULL, NULL),
+(2912, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/contact.php', '/contact', '2025-09-19 06:33:35', NULL, NULL),
+(2913, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/about-us.php', '/about-us', '2025-09-19 06:33:37', NULL, NULL),
+(2914, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/about-us.php', '/about-us', '2025-09-19 06:33:37', NULL, NULL),
+(2915, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/cookie-policy.php', '/cookie-policy', '2025-09-19 06:33:39', NULL, NULL),
+(2916, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/cookie-policy.php', '/cookie-policy', '2025-09-19 06:33:39', NULL, NULL),
+(2917, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/privacy-policy.php', '/privacy-policy', '2025-09-19 06:33:40', NULL, NULL),
+(2918, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/privacy-policy.php', '/privacy-policy', '2025-09-19 06:33:41', NULL, NULL),
+(2919, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/terms-and-conditions.php', '/terms-and-conditions', '2025-09-19 06:33:43', NULL, NULL),
+(2920, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/terms-and-conditions.php', '/terms-and-conditions', '2025-09-19 06:33:43', NULL, NULL),
+(2921, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/about-reliant-consultancy-group.php', '/about-reliant-consultancy-group', '2025-09-19 06:33:45', NULL, NULL),
+(2922, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/about-reliant-consultancy-group.php', '/about-reliant-consultancy-group', '2025-09-19 06:33:46', NULL, NULL),
+(2923, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/mission-vision-and-value.php', '/mission-vision-and-value', '2025-09-19 06:33:49', NULL, NULL),
+(2924, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/mission-vision-and-value.php', '/mission-vision-and-value', '2025-09-19 06:33:49', NULL, NULL),
+(2925, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/chairman-message.php', '/chairman-message', '2025-09-19 06:33:50', NULL, NULL),
+(2926, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/chairman-message.php', '/chairman-message', '2025-09-19 06:33:51', NULL, NULL),
+(2927, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/sustainability.php', '/sustainability', '2025-09-19 06:33:51', NULL, NULL),
+(2928, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/sustainability.php', '/sustainability', '2025-09-19 06:33:52', NULL, NULL),
+(2929, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/services.php', '/services', '2025-09-19 06:33:53', NULL, NULL),
+(2930, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/services.php', '/services', '2025-09-19 06:33:54', NULL, NULL),
+(2931, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/valuation-and-professional-advisory.php', '/valuation-and-professional-advisory', '2025-09-19 06:33:55', NULL, NULL),
+(2932, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/valuation-and-professional-advisory.php', '/valuation-and-professional-advisory', '2025-09-19 06:33:56', NULL, NULL),
+(2933, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/strategic-consultancy.php', '/strategic-consultancy', '2025-09-19 06:33:57', NULL, NULL),
+(2934, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/strategic-consultancy.php', '/strategic-consultancy', '2025-09-19 06:33:58', NULL, NULL),
+(2935, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/research.php', '/research', '2025-09-19 06:33:59', NULL, NULL),
+(2936, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/research.php', '/research', '2025-09-19 06:34:00', NULL, NULL),
+(2937, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/building-and-project-consultancy.php', '/building-and-project-consultancy', '2025-09-19 06:34:01', NULL, NULL),
+(2938, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/building-and-project-consultancy.php', '/building-and-project-consultancy', '2025-09-19 06:34:01', NULL, NULL),
+(2939, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/buying-and-selling.php', '/buying-and-selling', '2025-09-19 06:34:02', NULL, NULL),
+(2940, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/buying-and-selling.php', '/buying-and-selling', '2025-09-19 06:34:03', NULL, NULL),
+(2941, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/investment.php', '/investment', '2025-09-19 06:34:04', NULL, NULL),
+(2942, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/investment.php', '/investment', '2025-09-19 06:34:05', NULL, NULL),
+(2943, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/residential.php', '/residential', '2025-09-19 06:34:07', NULL, NULL),
+(2944, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/residential.php', '/residential', '2025-09-19 06:34:07', NULL, NULL),
+(2945, '3.237.43.56', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', '', '/', '2025-09-19 06:34:08', NULL, NULL),
+(2946, '52.230.164.182', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; ChatGPT-User/1.0; +https://openai.com/bot', '', '/market-research-and-reports', '2025-09-19 06:34:14', NULL, NULL),
+(2947, '52.230.164.182', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; ChatGPT-User/1.0; +https://openai.com/bot', '', '/', '2025-09-19 06:34:15', NULL, NULL),
+(2948, '18.215.77.19', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Amazonbot/0.1; +https://developer.amazon.com/support/amazonbot) Chrome/119.0.6045.214 Safari/537.36', '', '/golden-visa-reforms-and-mortgage-valuation', '2025-09-19 06:34:41', NULL, NULL),
+(2949, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://hpanel.hostinger.com/', '/', '2025-09-19 06:35:28', NULL, NULL),
+(2950, '42.236.12.232', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36; 360Spider', 'https://www.reliantsurveyors.com/', '/', '2025-09-19 06:35:29', NULL, NULL),
+(2951, '135.237.131.221', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; ChatGPT-User/1.0; +https://openai.com/bot', '', '/golden-visa-reforms-and-mortgage-valuation', '2025-09-19 06:35:29', NULL, NULL),
+(2952, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/', '/', '2025-09-19 06:37:00', NULL, NULL),
+(2953, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/', '/residential', '2025-09-19 06:37:04', NULL, NULL),
+(2954, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/', '/residential', '2025-09-19 06:37:39', NULL, NULL),
+(2955, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/residential', '/', '2025-09-19 06:37:42', NULL, NULL),
+(2956, '216.73.216.98', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)', '', '/plant-and-machinery', '2025-09-19 06:39:04', NULL, NULL),
+(2957, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', '', '/', '2025-09-19 06:39:09', NULL, NULL),
+(2958, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', '', '/', '2025-09-19 06:39:09', NULL, NULL),
+(2959, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/contact.php', '/contact', '2025-09-19 06:39:11', NULL, NULL),
+(2960, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/contact.php', '/contact', '2025-09-19 06:39:11', NULL, NULL),
+(2961, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/about-us.php', '/about-us', '2025-09-19 06:39:13', NULL, NULL),
+(2962, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/about-us.php', '/about-us', '2025-09-19 06:39:14', NULL, NULL),
+(2963, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/cookie-policy.php', '/cookie-policy', '2025-09-19 06:39:15', NULL, NULL);
+INSERT INTO `page_access_logs` (`id`, `ip_address`, `user_agent`, `referer`, `request_uri`, `accessed_at`, `headers`, `session_id`) VALUES
+(2964, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/cookie-policy.php', '/cookie-policy', '2025-09-19 06:39:15', NULL, NULL),
+(2965, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/privacy-policy.php', '/privacy-policy', '2025-09-19 06:39:16', NULL, NULL),
+(2966, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/privacy-policy.php', '/privacy-policy', '2025-09-19 06:39:17', NULL, NULL),
+(2967, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/terms-and-conditions.php', '/terms-and-conditions', '2025-09-19 06:39:18', NULL, NULL),
+(2968, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/terms-and-conditions.php', '/terms-and-conditions', '2025-09-19 06:39:19', NULL, NULL),
+(2969, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/about-reliant-consultancy-group.php', '/about-reliant-consultancy-group', '2025-09-19 06:39:20', NULL, NULL),
+(2970, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/about-reliant-consultancy-group.php', '/about-reliant-consultancy-group', '2025-09-19 06:39:20', NULL, NULL),
+(2971, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/mission-vision-and-value.php', '/mission-vision-and-value', '2025-09-19 06:39:23', NULL, NULL),
+(2972, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/mission-vision-and-value.php', '/mission-vision-and-value', '2025-09-19 06:39:24', NULL, NULL),
+(2973, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/chairman-message.php', '/chairman-message', '2025-09-19 06:39:25', NULL, NULL),
+(2974, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/chairman-message.php', '/chairman-message', '2025-09-19 06:39:25', NULL, NULL),
+(2975, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/sustainability.php', '/sustainability', '2025-09-19 06:39:27', NULL, NULL),
+(2976, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/sustainability.php', '/sustainability', '2025-09-19 06:39:27', NULL, NULL),
+(2977, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/services.php', '/services', '2025-09-19 06:39:28', NULL, NULL),
+(2978, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/services.php', '/services', '2025-09-19 06:39:29', NULL, NULL),
+(2979, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/valuation-and-professional-advisory.php', '/valuation-and-professional-advisory', '2025-09-19 06:39:30', NULL, NULL),
+(2980, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/valuation-and-professional-advisory.php', '/valuation-and-professional-advisory', '2025-09-19 06:39:30', NULL, NULL),
+(2981, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/strategic-consultancy.php', '/strategic-consultancy', '2025-09-19 06:39:31', NULL, NULL),
+(2982, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/strategic-consultancy.php', '/strategic-consultancy', '2025-09-19 06:39:32', NULL, NULL),
+(2983, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/research.php', '/research', '2025-09-19 06:39:33', NULL, NULL),
+(2984, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/research.php', '/research', '2025-09-19 06:39:33', NULL, NULL),
+(2985, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/building-and-project-consultancy.php', '/building-and-project-consultancy', '2025-09-19 06:39:34', NULL, NULL),
+(2986, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/building-and-project-consultancy.php', '/building-and-project-consultancy', '2025-09-19 06:39:35', NULL, NULL),
+(2987, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/buying-and-selling.php', '/buying-and-selling', '2025-09-19 06:39:36', NULL, NULL),
+(2988, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/buying-and-selling.php', '/buying-and-selling', '2025-09-19 06:39:36', NULL, NULL),
+(2989, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/investment.php', '/investment', '2025-09-19 06:39:37', NULL, NULL),
+(2990, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/investment.php', '/investment', '2025-09-19 06:39:38', NULL, NULL),
+(2991, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/residential.php', '/residential', '2025-09-19 06:39:39', NULL, NULL),
+(2992, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/residential.php', '/residential', '2025-09-19 06:39:40', NULL, NULL),
+(2993, '35.153.144.218', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', '', '/', '2025-09-19 06:39:40', NULL, NULL),
+(2994, '66.249.79.4', 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.127 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', '', '/contact', '2025-09-19 06:40:43', NULL, NULL),
+(2995, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '', '/', '2025-09-19 06:41:49', NULL, NULL),
+(2996, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/', '/', '2025-09-19 06:42:20', NULL, NULL),
+(2997, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/', '/', '2025-09-19 06:42:20', NULL, NULL),
+(2998, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/contact', '/contact', '2025-09-19 06:42:23', NULL, NULL),
+(2999, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/contact', '/contact', '2025-09-19 06:42:23', NULL, NULL),
+(3000, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/about-us', '/about-us', '2025-09-19 06:42:25', NULL, NULL),
+(3001, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/about-us', '/about-us', '2025-09-19 06:42:27', NULL, NULL),
+(3002, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/cookie-policy', '/cookie-policy', '2025-09-19 06:42:28', NULL, NULL),
+(3003, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/cookie-policy', '/cookie-policy', '2025-09-19 06:42:29', NULL, NULL),
+(3004, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/privacy-policy', '/privacy-policy', '2025-09-19 06:42:31', NULL, NULL),
+(3005, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/privacy-policy', '/privacy-policy', '2025-09-19 06:42:32', NULL, NULL),
+(3006, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/terms-and-conditions', '/terms-and-conditions', '2025-09-19 06:42:34', NULL, NULL),
+(3007, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/terms-and-conditions', '/terms-and-conditions', '2025-09-19 06:42:35', NULL, NULL),
+(3008, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/about-reliant-consultancy-group', '/about-reliant-consultancy-group', '2025-09-19 06:42:37', NULL, NULL),
+(3009, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/about-reliant-consultancy-group', '/about-reliant-consultancy-group', '2025-09-19 06:42:38', NULL, NULL),
+(3010, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/', '/', '2025-09-19 06:42:41', NULL, NULL),
+(3011, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/', '/', '2025-09-19 06:42:42', NULL, NULL),
+(3012, '52.167.144.18', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/assets/market-reports/assets/images/logo/assets/images/background/office-business-space.php', '2025-09-19 06:42:43', NULL, NULL),
+(3013, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/mission-vision-and-value', '/mission-vision-and-value', '2025-09-19 06:42:44', NULL, NULL),
+(3014, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/mission-vision-and-value', '/mission-vision-and-value', '2025-09-19 06:42:45', NULL, NULL),
+(3015, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/chairman-message', '/chairman-message', '2025-09-19 06:42:47', NULL, NULL),
+(3016, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/chairman-message', '/chairman-message', '2025-09-19 06:42:48', NULL, NULL),
+(3017, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/sustainability', '/sustainability', '2025-09-19 06:42:49', NULL, NULL),
+(3018, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/sustainability', '/sustainability', '2025-09-19 06:42:50', NULL, NULL),
+(3019, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/services', '/services', '2025-09-19 06:42:52', NULL, NULL),
+(3020, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/services', '/services', '2025-09-19 06:42:52', NULL, NULL),
+(3021, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '', '/', '2025-09-19 06:42:53', NULL, NULL),
+(3022, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/valuation-and-professional-advisory', '/valuation-and-professional-advisory', '2025-09-19 06:42:54', NULL, NULL),
+(3023, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/valuation-and-professional-advisory', '/valuation-and-professional-advisory', '2025-09-19 06:42:55', NULL, NULL),
+(3024, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/strategic-consultancy', '/strategic-consultancy', '2025-09-19 06:42:56', NULL, NULL),
+(3025, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/strategic-consultancy', '/strategic-consultancy', '2025-09-19 06:42:57', NULL, NULL),
+(3026, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/research', '/research', '2025-09-19 06:42:59', NULL, NULL),
+(3027, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/research', '/research', '2025-09-19 06:43:00', NULL, NULL),
+(3028, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/building-and-project-consultancy', '/building-and-project-consultancy', '2025-09-19 06:43:01', NULL, NULL),
+(3029, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/building-and-project-consultancy', '/building-and-project-consultancy', '2025-09-19 06:43:02', NULL, NULL),
+(3030, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/buying-and-selling', '/buying-and-selling', '2025-09-19 06:43:04', NULL, NULL),
+(3031, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/buying-and-selling', '/buying-and-selling', '2025-09-19 06:43:05', NULL, NULL),
+(3032, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/investment', '/investment', '2025-09-19 06:43:07', NULL, NULL),
+(3033, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/investment', '/investment', '2025-09-19 06:43:08', NULL, NULL),
+(3034, '44.200.17.157', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36', 'https://reliantsurveyors.com/', '/', '2025-09-19 06:43:09', NULL, NULL),
+(3035, '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0', '', '/', '2025-09-19 06:43:24', NULL, NULL),
+(3036, '66.249.79.3', 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.127 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', '', '/', '2025-09-19 06:43:58', NULL, NULL),
+(3037, '2401:4900:5aa5:36b7:f5ef:4460:5978:4465', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.google.com/', '/', '2025-09-19 06:44:59', NULL, NULL),
+(3038, '2401:4900:5aa5:36b7:f5ef:4460:5978:4465', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/residential', '/', '2025-09-19 06:46:06', NULL, NULL),
+(3039, '43.159.128.155', 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', 'https://reliantsurveyors.com/', '/', '2025-09-19 06:46:12', NULL, NULL),
+(3040, '40.77.167.74', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/assets/vendors/jquery-lettering/assets/vendors/circleGraph/hospitality-leisure.php', '2025-09-19 06:46:27', NULL, NULL),
+(3041, '2001:4860:7:405::b5', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.google.com/', '/', '2025-09-19 06:47:52', NULL, NULL),
+(3042, '2401:4900:5aa5:36b7:f5ef:4460:5978:4465', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.google.com/', '/', '2025-09-19 06:48:57', NULL, NULL),
+(3043, '2401:4900:5aa5:36b7:f5ef:4460:5978:4465', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/', '/', '2025-09-19 06:49:29', NULL, NULL),
+(3044, '2401:4900:5aa5:36b7:f5ef:4460:5978:4465', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'https://www.reliantsurveyors.com/residential', '/', '2025-09-19 06:51:28', NULL, NULL),
+(3045, '52.167.144.18', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/116.0.1938.76 Safari/537.36', '', '/index.php/our-services/assets/market-reports/assets/images/logo/assets/images/svg/header/commercial.php', '2025-09-19 06:51:49', NULL, NULL),
+(3046, '2a01:4ff:f0:8ce::1', 'Mozilla/5.0 (compatible; monitoring360bot/1.1; +https://app.360monitoring.com/bot.html)', '', '/', '2025-09-19 06:52:33', NULL, NULL),
+(3047, '114.119.140.73', 'Mozilla/5.0 (Linux; Android 7.0;) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36 (compatible; PetalBot;+https://webmaster.petalsearch.com/site/petalbot)', 'https://www.reliantsurveyors.com/sitemap.xml', '/careers', '2025-09-19 06:52:36', NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `popup_enquiry`
+--
+
+CREATE TABLE `popup_enquiry` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `full_name` varchar(200) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `user_agent` varchar(512) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `popup_enquiry`
+--
+
+INSERT INTO `popup_enquiry` (`id`, `full_name`, `email`, `phone`, `company`, `ip_address`, `user_agent`, `created_at`) VALUES
+(1, 'Popup Form', 'admin@houzzhunt.com', '08400438136', 'Reliant', '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-09-19 06:35:48'),
+(2, 'Shoaib Ahmad', 'shoaib@reliantsurveyors.com', '08400438136', 'Testing', '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-09-19 06:37:19'),
+(3, 'Shoaib Ahmad 222', 'surveyor@gmail.com', '08400438136', 'Reliant', '2409:40e3:30a8:e50b:ad38:a59a:4067:7a4f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-09-19 06:37:52'),
+(4, 'Hello Shoaib', 'hello@gmail.com', '9878987656', 'Reliant', '2401:4900:5aa5:36b7:f5ef:4460:5978:4465', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-09-19 06:46:37'),
+(5, 'Shoaib Ahmad', 'shoaib@reliantsurveyors.com', '08400438136', 'Reliant', '2401:4900:5aa5:36b7:f5ef:4460:5978:4465', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-09-19 06:48:04'),
+(6, 'Shoaib Ahmad', 'saravjeeet@gmail.com', '08400438136', 'testing', '2401:4900:5aa5:36b7:f5ef:4460:5978:4465', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-09-19 06:49:11'),
+(7, 'Shoaib Ahmad', 'shoaib@reliantsurveyors.com', '08400438136', 'Reliant', '2401:4900:5aa5:36b7:f5ef:4460:5978:4465', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-09-19 06:51:46');
 
 --
 -- Indexes for dumped tables
@@ -2974,6 +3244,13 @@ ALTER TABLE `page_access_logs`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `popup_enquiry`
+--
+ALTER TABLE `popup_enquiry`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `email_idx` (`email`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -2993,13 +3270,19 @@ ALTER TABLE `certificate_search_logs`
 -- AUTO_INCREMENT for table `enquiries`
 --
 ALTER TABLE `enquiries`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `page_access_logs`
 --
 ALTER TABLE `page_access_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2810;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3048;
+
+--
+-- AUTO_INCREMENT for table `popup_enquiry`
+--
+ALTER TABLE `popup_enquiry`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

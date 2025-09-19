@@ -36,7 +36,8 @@ function render_sidebar(string $active): void
     'home'      => ['href' => 'index.php', 'icon' => 'bi-house',     'label' => 'Dashboard'],
     'logs'      => ['href' => 'page_access_logs.php', 'icon' => 'bi-universal-access-circle',       'label' => 'Page Access Logs'],
     'analytics' => ['href' => 'analytics_dashboard.php', 'icon' => 'bi-graph-up-arrow', 'label' => 'Analytics Dashboard'],
-    'contac-form' => ['href' => 'contact_form_submissions.php', 'icon' => 'bi-person-rolodex', 'label' => 'Contact Submisiions'],
+    'contact-form' => ['href' => 'contact_form_submissions.php', 'icon' => 'bi-person-rolodex', 'label' => 'Contact Submisiions'],
+    'popup-form' => ['href' => 'popup_form_submissions.php', 'icon' => 'bi-person-rolodex', 'label' => 'Popup Submisiions'],
   ];
 
   echo '<aside class="col-12 col-md-3 col-lg-2 sidebar p-3">';
