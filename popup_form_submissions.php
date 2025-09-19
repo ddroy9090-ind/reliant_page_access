@@ -16,17 +16,53 @@ if (!is_authenticated()) {
 $pdo = db();
 $submissions = [];
 $error = null;
+$perPage = 10;
+$page = filter_input(
+  INPUT_GET,
+  'page',
+  FILTER_VALIDATE_INT,
+  ['options' => ['default' => 1, 'min_range' => 1]]
+);
+$offset = ($page - 1) * $perPage;
+$totalSubmissions = 0;
+$totalPages = 0;
 
 try {
-  $stmt = $pdo->query(
-    'SELECT id, full_name, email, phone, company, ip_address, user_agent, created_at FROM popup_enquiry ORDER BY created_at DESC'
-  );
-  $submissions = $stmt->fetchAll();
+  $countStmt = $pdo->query('SELECT COUNT(*) FROM popup_enquiry');
+  $totalSubmissions = (int)$countStmt->fetchColumn();
+
+  if ($totalSubmissions > 0) {
+    $totalPages = (int)ceil($totalSubmissions / $perPage);
+    if ($page > $totalPages) {
+      $page = $totalPages;
+      $offset = ($page - 1) * $perPage;
+    }
+
+    $query = sprintf(
+      'SELECT id, full_name, email, phone, company, ip_address, user_agent, created_at FROM popup_enquiry ORDER BY created_at DESC LIMIT %d OFFSET %d',
+      $perPage,
+      $offset
+    );
+    $stmt = $pdo->query($query);
+    $submissions = $stmt->fetchAll();
+  } else {
+    $page = 1;
+    $offset = 0;
+  }
 } catch (Throwable $e) {
   $error = 'Unable to load popup form submissions at this time.';
 }
 
-$totalSubmissions = count($submissions);
+$paginationBasePath = strtok((string)($_SERVER['REQUEST_URI'] ?? ''), '?') ?: '/popup_form_submissions.php';
+$paginationQueryParams = $_GET;
+unset($paginationQueryParams['page']);
+$buildPaginationUrl = static function (int $targetPage) use ($paginationBasePath, $paginationQueryParams): string {
+  $params = $paginationQueryParams;
+  $params['page'] = $targetPage;
+  $queryString = http_build_query($params);
+  $url = $paginationBasePath . ($queryString ? '?' . $queryString : '');
+  return $url === '' ? '#' : $url;
+};
 
 render_head('Popup Form Submissions');
 echo '<div class="container-fluid layout">';
@@ -109,6 +145,35 @@ render_sidebar('popup-form');
           </tbody>
         </table>
       </div>
+      <?php if ($totalPages > 1): ?>
+        <nav aria-label="Popup form submissions pagination" class="mt-3">
+          <ul class="pagination mb-0">
+            <li class="page-item<?= $page <= 1 ? ' disabled' : '' ?>">
+              <?php if ($page <= 1): ?>
+                <span class="page-link">Previous</span>
+              <?php else: ?>
+                <a class="page-link" href="<?= htmlspecialchars($buildPaginationUrl($page - 1), ENT_QUOTES, 'UTF-8') ?>" aria-label="Previous">Previous</a>
+              <?php endif; ?>
+            </li>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+              <li class="page-item<?= $i === $page ? ' active' : '' ?>"<?php if ($i === $page): ?> aria-current="page"<?php endif; ?>>
+                <?php if ($i === $page): ?>
+                  <span class="page-link"><?= $i ?></span>
+                <?php else: ?>
+                  <a class="page-link" href="<?= htmlspecialchars($buildPaginationUrl($i), ENT_QUOTES, 'UTF-8') ?>"><?= $i ?></a>
+                <?php endif; ?>
+              </li>
+            <?php endfor; ?>
+            <li class="page-item<?= $page >= $totalPages ? ' disabled' : '' ?>">
+              <?php if ($page >= $totalPages): ?>
+                <span class="page-link">Next</span>
+              <?php else: ?>
+                <a class="page-link" href="<?= htmlspecialchars($buildPaginationUrl($page + 1), ENT_QUOTES, 'UTF-8') ?>" aria-label="Next">Next</a>
+              <?php endif; ?>
+            </li>
+          </ul>
+        </nav>
+      <?php endif; ?>
     </div>
   <?php endif; ?>
 </main>
