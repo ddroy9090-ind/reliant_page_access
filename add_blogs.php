@@ -143,7 +143,7 @@ render_sidebar('add-blogs');
   </div>
 
   <?php if ($success): ?>
-    <div class="alert alert-success" role="alert">
+    <div class="alert alert-success" role="alert" id="blog-success-alert">
       <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
     </div>
   <?php endif; ?>
@@ -159,7 +159,7 @@ render_sidebar('add-blogs');
   <?php endif; ?>
 
   <div class="box">
-    <form method="post" enctype="multipart/form-data" class="row g-3">
+    <form method="post" enctype="multipart/form-data" class="row g-3" id="add-blog-form">
       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
       <div class="col-12">
         <label for="image" class="form-label">Upload Blog Images</label>
@@ -204,6 +204,23 @@ echo '</div>';
       .catch(error => {
         console.error('CKEditor initialization failed', error);
       });
+  })();
+</script>
+<script>
+  (function() {
+    const alertBox = document.getElementById('blog-success-alert');
+    if (!alertBox) {
+      return;
+    }
+
+    const form = document.getElementById('add-blog-form');
+    if (form) {
+      form.reset();
+    }
+
+    window.setTimeout(() => {
+      alertBox.classList.add('d-none');
+    }, 5000);
   })();
 </script>
 <?php
