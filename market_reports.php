@@ -91,7 +91,7 @@ render_sidebar('market-reports');
       <h3 class="h5 mb-0">Add Market Report Form</h3>
     </div>
     <div class="card-body">
-      <form class="row g-3" method="post" enctype="multipart/form-data" novalidate>
+      <form id="market-report-form" class="row g-3" method="post" enctype="multipart/form-data" novalidate>
         <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
 
         <div class="col-12">
@@ -183,32 +183,51 @@ render_sidebar('market-reports');
       </form>
     </div>
   </div>
-  <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@39.0.1/build/ckeditor.js"></script>
   <script>
     (() => {
-      if (!window.CKEDITOR) {
+      if (!window.ClassicEditor) {
         return;
       }
 
-      const defaultConfig = {
-        height: 240,
-        removeButtons: 'Source',
-        toolbar: [
-          { name: 'clipboard', items: ['Undo', 'Redo'] },
-          { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
-          { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
-          { name: 'links', items: ['Link', 'Unlink'] },
-          { name: 'insert', items: ['Table', 'HorizontalRule'] },
-          { name: 'styles', items: ['Format'] },
-          { name: 'document', items: ['Maximize'] }
-        ]
+      const editors = [];
+      const form = document.getElementById('market-report-form');
+
+      const syncEditorData = () => {
+        editors.forEach(({ editor, textarea }) => {
+          textarea.value = editor.getData();
+        });
       };
 
+      const resetEditors = () => {
+        editors.forEach(({ editor, textarea }) => {
+          const defaultValue = textarea.dataset.defaultValue ?? '';
+          editor.setData(defaultValue);
+          textarea.value = defaultValue;
+        });
+      };
+
+      if (form) {
+        form.addEventListener('submit', syncEditorData);
+        form.addEventListener('reset', resetEditors);
+      }
+
       document.querySelectorAll('.rich-text-editor').forEach((textarea) => {
-        if (!textarea.id) {
-          return;
-        }
-        CKEDITOR.replace(textarea.id, defaultConfig);
+        const defaultValue = textarea.value;
+        textarea.dataset.defaultValue = defaultValue;
+
+        ClassicEditor
+          .create(textarea)
+          .then((editor) => {
+            editors.push({ editor, textarea });
+
+            if (textarea.hasAttribute('required')) {
+              textarea.removeAttribute('required');
+            }
+          })
+          .catch((error) => {
+            console.error('CKEditor initialization failed', error);
+          });
       });
     })();
   </script>
