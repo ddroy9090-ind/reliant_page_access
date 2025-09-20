@@ -61,11 +61,11 @@ function rl_hit(string $bucket, int $limitPerMinute): void
 
 function db(): PDO
 {
-  $host = '127.0.0.1'; // instead of localhost
+  $host = 'localhost'; // instead of localhost
   $db   = 'certificate';
   $user = 'root';
   $pass = ''; // change if you set a password
-  $dsn  = "mysql:host=$host;port=3307;dbname=$db;charset=utf8mb4";
+  $dsn  = "mysql:host=$host;port=3306;dbname=$db;charset=utf8mb4";
 
   return new PDO($dsn, $user, $pass, [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,

@@ -159,6 +159,10 @@ render_sidebar('all-blogs');
       <h2 class="title-heading">All Blogs</h2>
       <p class="para mb-0">Review existing blog posts, edit them through the Add Blogs form, and manage their content.</p>
     </div>
+
+    <div class="text-end">
+      <a href="add_blogs.php" class="btn btn-primary">Add Blogs</a>
+    </div>
   </div>
 
   <?php if ($successMessage): ?>
@@ -179,10 +183,11 @@ render_sidebar('all-blogs');
     </div>
   <?php endif; ?>
 
-  <div class="alert alert-info" role="alert">
+  <!-- <div class="alert alert-info" role="alert">
     To edit an existing blog entry, open it in the
     <a href="add_blogs.php" class="alert-link">Add Blogs</a> form and update the content from there.
-  </div>
+  </div> -->
+
 
   <div class="box">
     <div class="table-responsive">
@@ -201,23 +206,23 @@ render_sidebar('all-blogs');
           <?php if ($blogs): ?>
             <?php foreach ($blogs as $blog): ?>
               <?php
-                $blogId = (int)($blog['id'] ?? 0);
-                $imagePath = (string)($blog['image_path'] ?? '');
-                $heading = (string)($blog['heading'] ?? '');
-                $banner = (string)($blog['banner_description'] ?? '');
-                $author = (string)($blog['author_name'] ?? '');
-                $createdAt = $blog['created_at'] ?? null;
-                $excerpt = all_blogs_excerpt($banner);
-                $formattedDate = all_blogs_format_date(is_string($createdAt) ? $createdAt : null);
+              $blogId = (int)($blog['id'] ?? 0);
+              $imagePath = (string)($blog['image_path'] ?? '');
+              $heading = (string)($blog['heading'] ?? '');
+              $banner = (string)($blog['banner_description'] ?? '');
+              $author = (string)($blog['author_name'] ?? '');
+              $createdAt = $blog['created_at'] ?? null;
+              $excerpt = all_blogs_excerpt($banner);
+              $formattedDate = all_blogs_format_date(is_string($createdAt) ? $createdAt : null);
               ?>
               <tr data-blog-id="<?= htmlspecialchars((string)$blogId, ENT_QUOTES, 'UTF-8') ?>">
                 <td class="fw-semibold text-nowrap">#<?= htmlspecialchars((string)$blogId, ENT_QUOTES, 'UTF-8') ?></td>
                 <td>
                   <?php if ($imagePath !== ''): ?>
                     <img src="<?= htmlspecialchars($imagePath, ENT_QUOTES, 'UTF-8') ?>"
-                         alt="Blog image for <?= htmlspecialchars($heading, ENT_QUOTES, 'UTF-8') ?>"
-                         class="rounded"
-                         style="width: 80px; height: 50px; object-fit: cover;">
+                      alt="Blog image for <?= htmlspecialchars($heading, ENT_QUOTES, 'UTF-8') ?>"
+                      class="rounded"
+                      style="width: 80px; height: 50px; object-fit: cover;">
                   <?php else: ?>
                     <span class="text-muted">No image</span>
                   <?php endif; ?>
@@ -233,15 +238,15 @@ render_sidebar('all-blogs');
                 <td>
                   <div class="d-flex gap-2">
                     <a class="btn btn-sm btn-outline-primary"
-                       href="add_blogs.php?id=<?= htmlspecialchars((string)$blogId, ENT_QUOTES, 'UTF-8') ?>"
-                       title="Edit blog">
+                      href="add_blogs.php?id=<?= htmlspecialchars((string)$blogId, ENT_QUOTES, 'UTF-8') ?>"
+                      title="Edit blog">
                       <i class="bi bi-pencil-square"></i>
                     </a>
                     <button type="button"
-                            class="btn btn-sm btn-outline-danger"
-                            title="Delete blog"
-                            data-delete-blog="1"
-                            data-blog-id="<?= htmlspecialchars((string)$blogId, ENT_QUOTES, 'UTF-8') ?>">
+                      class="btn btn-sm btn-outline-danger"
+                      title="Delete blog"
+                      data-delete-blog="1"
+                      data-blog-id="<?= htmlspecialchars((string)$blogId, ENT_QUOTES, 'UTF-8') ?>">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -270,7 +275,7 @@ $blogsJson = json_encode($blogsForJson, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_
   window.allBlogsData = <?= $blogsJson ?: '[]' ?>;
 </script>
 <script>
-  (function () {
+  (function() {
     const deleteForm = document.getElementById('delete-blog-form');
     const deleteId = document.getElementById('delete-blog-id');
     const blogsData = Array.isArray(window.allBlogsData) ? window.allBlogsData : [];
