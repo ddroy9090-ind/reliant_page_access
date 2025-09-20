@@ -326,8 +326,7 @@ render_sidebar('market-reports');
         method="post"
         enctype="multipart/form-data"
         novalidate
-        data-reset-on-load="<?= $shouldResetForm ? '1' : '0' ?>"
-      >
+        data-reset-on-load="<?= $shouldResetForm ? '1' : '0' ?>">
         <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
 
         <div class="col-12">
@@ -338,8 +337,7 @@ render_sidebar('market-reports');
             id="heading"
             name="heading"
             value="<?= htmlspecialchars($heading, ENT_QUOTES, 'UTF-8') ?>"
-            required
-          >
+            required>
         </div>
 
         <div class="col-12">
@@ -350,8 +348,7 @@ render_sidebar('market-reports');
             id="subheading"
             name="subheading"
             value="<?= htmlspecialchars($subheading, ENT_QUOTES, 'UTF-8') ?>"
-            required
-          >
+            required>
         </div>
 
         <div class="col-12">
@@ -361,8 +358,7 @@ render_sidebar('market-reports');
             id="short_description"
             name="short_description"
             rows="4"
-            required
-          ><?= htmlspecialchars($shortDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
+            required><?= htmlspecialchars($shortDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
           <div class="form-text">Provide a concise overview of the report to help users understand its focus.</div>
         </div>
 
@@ -373,20 +369,31 @@ render_sidebar('market-reports');
             id="long_description"
             name="long_description"
             rows="6"
-            required
-          ><?= htmlspecialchars($longDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
+            required><?= htmlspecialchars($longDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
           <div class="form-text">Provide detailed insights, methodology, and supporting data for the report.</div>
         </div>
 
         <div class="col-md-6">
           <label class="form-label" for="report_image">Upload Report Image</label>
-          <input class="form-control" type="file" id="report_image" name="report_image" accept="image/*">
+          <div class="upload-box">
+            <input class="form-control file-input" type="file" id="report_image" name="report_image" accept="image/*">
+            <div class="upload-content">
+              <img src="assets/images/file.png" alt="" width="30px">
+              <p>Drop files here or click to upload</p>
+            </div>
+          </div>
           <div class="form-text">Preferred formats: JPG, PNG or WEBP.</div>
         </div>
 
         <div class="col-md-6">
           <label class="form-label" for="report_pdf">Upload Report PDF</label>
-          <input class="form-control" type="file" id="report_pdf" name="report_pdf" accept="application/pdf">
+          <div class="upload-box">
+            <input class="form-control file-input" type="file" id="report_pdf" name="report_pdf" accept="application/pdf">
+            <div class="upload-content">
+              <img src="assets/images/file.png" alt="" width="30px">
+              <p>Drop files here or click to upload</p>
+            </div>
+          </div>
           <div class="form-text">Attach the full market report in PDF format.</div>
         </div>
 
@@ -398,8 +405,7 @@ render_sidebar('market-reports');
             id="mockup_heading"
             name="mockup_heading"
             value="<?= htmlspecialchars($mockupHeading, ENT_QUOTES, 'UTF-8') ?>"
-            required
-          >
+            required>
         </div>
 
         <div class="col-12">
@@ -409,19 +415,30 @@ render_sidebar('market-reports');
             id="mockup_description"
             name="mockup_description"
             rows="4"
-            required
-          ><?= htmlspecialchars($mockupDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
+            required><?= htmlspecialchars($mockupDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
         </div>
 
         <div class="col-md-6">
           <label class="form-label" for="report_mockup">Upload Report Mockup</label>
-          <input class="form-control" type="file" id="report_mockup" name="report_mockup" accept="image/*">
+          <div class="upload-box">
+            <input class="form-control file-input" type="file" id="report_mockup" name="report_mockup" accept="image/*">
+            <div class="upload-content">
+              <img src="assets/images/file.png" alt="" width="30px">
+              <p>Drop files here or click to upload</p>
+            </div>
+          </div>
           <div class="form-text">Upload a mockup or preview image that showcases the report design.</div>
         </div>
 
         <div class="col-md-6">
           <label class="form-label" for="form_banner">Upload Form Banner</label>
-          <input class="form-control" type="file" id="form_banner" name="form_banner" accept="image/*">
+          <div class="upload-box">
+            <input class="form-control file-input" type="file" id="form_banner" name="form_banner" accept="image/*">
+            <div class="upload-content">
+              <img src="assets/images/file.png" alt="" width="30px">
+              <p>Drop files here or click to upload</p>
+            </div>
+          </div>
           <div class="form-text">This banner appears above the report download form on the public site.</div>
         </div>
 
@@ -457,13 +474,19 @@ render_sidebar('market-reports');
       const editors = [];
 
       const syncEditorData = () => {
-        editors.forEach(({ editor, textarea }) => {
+        editors.forEach(({
+          editor,
+          textarea
+        }) => {
           textarea.value = editor.getData();
         });
       };
 
       const resetEditors = () => {
-        editors.forEach(({ editor, textarea }) => {
+        editors.forEach(({
+          editor,
+          textarea
+        }) => {
           const defaultValue = textarea.dataset.defaultValue ?? '';
           editor.setData(defaultValue);
           textarea.value = defaultValue;
@@ -486,7 +509,10 @@ render_sidebar('market-reports');
         ClassicEditor
           .create(textarea)
           .then((editor) => {
-            editors.push({ editor, textarea });
+            editors.push({
+              editor,
+              textarea
+            });
 
             if (textarea.hasAttribute('required')) {
               textarea.removeAttribute('required');

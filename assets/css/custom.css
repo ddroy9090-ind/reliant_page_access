@@ -194,6 +194,56 @@ table td {
     padding-left: 33px !important;
 }
 
+.card-header.bg-primary.text-white {
+    background-color: #d01f28 !important;
+    border-bottom: 1px #d01f28 solid;
+}
+
+.upload-box {
+  position: relative;
+  border: 2px dashed #d01f28;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+  background-color: #fff;
+}
+
+.upload-box:hover {
+  background-color: #fff5f6;
+}
+
+.file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-content {
+  pointer-events: none;
+}
+
+.upload-icon {
+  font-size: 40px;
+  color: #d01f28;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.upload-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.form-label {
+    margin-bottom: .5rem;
+    font-size: 14px;
+    color: #000;
+}
+
 
 @media (max-width: 1199.98px) {
     .stat-grid {
