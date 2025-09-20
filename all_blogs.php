@@ -31,9 +31,38 @@ try {
       banner_description TEXT NOT NULL,
       author_name VARCHAR(255) NOT NULL,
       content LONGTEXT NOT NULL,
+      meta_title VARCHAR(255) DEFAULT NULL,
+      meta_keywords TEXT DEFAULT NULL,
+      meta_description TEXT DEFAULT NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
   );
+
+  $columnsToEnsure = [
+    'meta_title'       => 'ALTER TABLE blogs ADD COLUMN meta_title VARCHAR(255) DEFAULT NULL',
+    'meta_keywords'    => 'ALTER TABLE blogs ADD COLUMN meta_keywords TEXT DEFAULT NULL',
+    'meta_description' => 'ALTER TABLE blogs ADD COLUMN meta_description TEXT DEFAULT NULL',
+  ];
+
+  foreach ($columnsToEnsure as $column => $alterSql) {
+    try {
+      $stmt = $pdo->prepare('SHOW COLUMNS FROM blogs LIKE :column');
+      $stmt->execute([':column' => $column]);
+      $exists = $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+    } catch (Throwable $columnCheckError) {
+      $exists = false;
+    }
+
+    if ($exists) {
+      continue;
+    }
+
+    try {
+      $pdo->exec($alterSql);
+    } catch (Throwable $alterError) {
+      error_log(sprintf('Failed to ensure column %s on blogs table: %s', $column, $alterError->getMessage()));
+    }
+  }
 } catch (Throwable $e) {
   error_log('Failed to ensure blogs table exists: ' . $e->getMessage());
   $error = 'Unable to load blogs at the moment. Please try again later.';
@@ -93,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $error === null) {
 if ($error === null) {
   try {
     $stmt = $pdo->query(
-      'SELECT id, image_path, heading, banner_description, author_name, content, created_at
+      'SELECT id, image_path, heading, banner_description, author_name, content, meta_title, meta_keywords, meta_description, created_at
          FROM blogs
         ORDER BY created_at DESC, id DESC'
     );
@@ -144,6 +173,9 @@ $blogsForJson = array_map(
     'banner_description' => (string)($blog['banner_description'] ?? ''),
     'author_name'        => (string)($blog['author_name'] ?? ''),
     'content'            => (string)($blog['content'] ?? ''),
+    'meta_title'         => (string)($blog['meta_title'] ?? ''),
+    'meta_keywords'      => (string)($blog['meta_keywords'] ?? ''),
+    'meta_description'   => (string)($blog['meta_description'] ?? ''),
   ],
   $blogs
 );

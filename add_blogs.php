@@ -26,9 +26,38 @@ function add_blogs_ensure_table(PDO $pdo): void
       banner_description TEXT NOT NULL,
       author_name VARCHAR(255) NOT NULL,
       content LONGTEXT NOT NULL,
+      meta_title VARCHAR(255) DEFAULT NULL,
+      meta_keywords TEXT DEFAULT NULL,
+      meta_description TEXT DEFAULT NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
   );
+
+  $columnsToEnsure = [
+    'meta_title'       => 'ALTER TABLE blogs ADD COLUMN meta_title VARCHAR(255) DEFAULT NULL',
+    'meta_keywords'    => 'ALTER TABLE blogs ADD COLUMN meta_keywords TEXT DEFAULT NULL',
+    'meta_description' => 'ALTER TABLE blogs ADD COLUMN meta_description TEXT DEFAULT NULL',
+  ];
+
+  foreach ($columnsToEnsure as $column => $alterSql) {
+    try {
+      $stmt = $pdo->prepare('SHOW COLUMNS FROM blogs LIKE :column');
+      $stmt->execute([':column' => $column]);
+      $exists = $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+    } catch (Throwable $columnCheckError) {
+      $exists = false;
+    }
+
+    if ($exists) {
+      continue;
+    }
+
+    try {
+      $pdo->exec($alterSql);
+    } catch (Throwable $alterError) {
+      error_log(sprintf('Failed to ensure column %s on blogs table: %s', $column, $alterError->getMessage()));
+    }
+  }
 }
 
 /**
@@ -50,6 +79,9 @@ $heading = '';
 $bannerDescription = '';
 $authorName = '';
 $content = '';
+$metaTitle = '';
+$metaKeywords = '';
+$metaDescription = '';
 $currentImagePath = '';
 $editingId = 0;
 $isEditing = false;
@@ -86,6 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bannerDescription = trim((string)($_POST['banner_description'] ?? ''));
     $authorName = trim((string)($_POST['author_name'] ?? ''));
     $content = trim((string)($_POST['content'] ?? ''));
+    $metaTitle = trim((string)($_POST['meta_title'] ?? ''));
+    $metaKeywords = trim((string)($_POST['meta_keywords'] ?? ''));
+    $metaDescription = trim((string)($_POST['meta_description'] ?? ''));
 
     if ($isEditing) {
       try {
@@ -187,7 +222,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   heading = :heading,
                   banner_description = :banner_description,
                   author_name = :author_name,
-                  content = :content
+                  content = :content,
+                  meta_title = :meta_title,
+                  meta_keywords = :meta_keywords,
+                  meta_description = :meta_description
             WHERE id = :id'
         );
         $stmt->execute([
@@ -196,6 +234,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           ':banner_description' => $bannerDescription,
           ':author_name'        => $authorName,
           ':content'            => $content,
+          ':meta_title'         => $metaTitle !== '' ? $metaTitle : null,
+          ':meta_keywords'      => $metaKeywords !== '' ? $metaKeywords : null,
+          ':meta_description'   => $metaDescription !== '' ? $metaDescription : null,
           ':id'                 => $editingId,
         ]);
 
@@ -214,8 +255,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
       } else {
         $stmt = $pdo->prepare(
-          'INSERT INTO blogs (image_path, heading, banner_description, author_name, content, created_at)
-           VALUES (:image_path, :heading, :banner_description, :author_name, :content, NOW())'
+          'INSERT INTO blogs (
+              image_path,
+              heading,
+              banner_description,
+              author_name,
+              content,
+              meta_title,
+              meta_keywords,
+              meta_description,
+              created_at
+            ) VALUES (
+              :image_path,
+              :heading,
+              :banner_description,
+              :author_name,
+              :content,
+              :meta_title,
+              :meta_keywords,
+              :meta_description,
+              NOW()
+            )'
         );
         $stmt->execute([
           ':image_path'          => $imagePath,
@@ -223,10 +283,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           ':banner_description'  => $bannerDescription,
           ':author_name'         => $authorName,
           ':content'             => $content,
+          ':meta_title'          => $metaTitle !== '' ? $metaTitle : null,
+          ':meta_keywords'       => $metaKeywords !== '' ? $metaKeywords : null,
+          ':meta_description'    => $metaDescription !== '' ? $metaDescription : null,
         ]);
 
         $success = 'Your Blog has been added successfully.';
         $heading = $bannerDescription = $authorName = $content = '';
+        $metaTitle = $metaKeywords = $metaDescription = '';
         $currentImagePath = '';
         $editingId = 0;
         $isEditing = false;
@@ -258,6 +322,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $bannerDescription = (string)($existingBlog['banner_description'] ?? '');
       $authorName = (string)($existingBlog['author_name'] ?? '');
       $content = (string)($existingBlog['content'] ?? '');
+      $metaTitle = (string)($existingBlog['meta_title'] ?? '');
+      $metaKeywords = (string)($existingBlog['meta_keywords'] ?? '');
+      $metaDescription = (string)($existingBlog['meta_description'] ?? '');
       $currentImagePath = (string)($existingBlog['image_path'] ?? '');
     } else {
       $errors[] = 'The requested blog could not be found or may have been removed.';
@@ -344,6 +411,21 @@ render_sidebar('add-blogs');
       <div class="col-12">
         <label for="banner_description" class="form-label">Blog Banner Description</label>
         <textarea class="form-control" id="banner_description" name="banner_description" rows="3" required><?= htmlspecialchars($bannerDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
+      </div>
+      <div class="col-12 col-md-6">
+        <label for="meta_title" class="form-label">Meta Title</label>
+        <input type="text" class="form-control" id="meta_title" name="meta_title" value="<?= htmlspecialchars($metaTitle, ENT_QUOTES, 'UTF-8') ?>" maxlength="255">
+        <div class="form-text">Optional title used for SEO metadata.</div>
+      </div>
+      <div class="col-12 col-md-6">
+        <label for="meta_keywords" class="form-label">Meta Keywords</label>
+        <textarea class="form-control" id="meta_keywords" name="meta_keywords" rows="1"><?= htmlspecialchars($metaKeywords, ENT_QUOTES, 'UTF-8') ?></textarea>
+        <div class="form-text">Optional comma-separated keywords for search engines.</div>
+      </div>
+      <div class="col-12">
+        <label for="meta_description" class="form-label">Meta Description</label>
+        <textarea class="form-control" id="meta_description" name="meta_description" rows="3"><?= htmlspecialchars($metaDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
+        <div class="form-text">Optional description that appears in search results.</div>
       </div>
       <div class="col-12">
         <label for="content" class="form-label">Text Editor for Blog Details Page</label>
