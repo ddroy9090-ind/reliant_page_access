@@ -19,6 +19,7 @@ $success = null;
 $heading = '';
 $subheading = '';
 $shortDescription = '';
+$longDescription = '';
 $mockupHeading = '';
 $mockupDescription = '';
 
@@ -28,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $heading = trim((string)($_POST['heading'] ?? ''));
   $subheading = trim((string)($_POST['subheading'] ?? ''));
   $shortDescription = trim((string)($_POST['short_description'] ?? ''));
+  $longDescription = trim((string)($_POST['long_description'] ?? ''));
   $mockupHeading = trim((string)($_POST['mockup_heading'] ?? ''));
   $mockupDescription = trim((string)($_POST['mockup_description'] ?? ''));
 
@@ -41,6 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($shortDescription === '') {
     $errors[] = 'Short description is required.';
+  }
+
+  if ($longDescription === '') {
+    $errors[] = 'Long description is required.';
   }
 
   if ($mockupHeading === '') {
@@ -128,6 +134,18 @@ render_sidebar('market-reports');
             required
           ><?= htmlspecialchars($shortDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
           <div class="form-text">Provide a concise overview of the report to help users understand its focus.</div>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label" for="long_description">Add Long Descriptions</label>
+          <textarea
+            class="form-control rich-text-editor"
+            id="long_description"
+            name="long_description"
+            rows="6"
+            required
+          ><?= htmlspecialchars($longDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
+          <div class="form-text">Provide detailed insights, methodology, and supporting data for the report.</div>
         </div>
 
         <div class="col-md-6">
