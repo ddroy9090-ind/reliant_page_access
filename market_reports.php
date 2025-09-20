@@ -6,6 +6,92 @@ require_once __DIR__ . '/includes/bootstrap.php';
 require_once __DIR__ . '/includes/render.php';
 require_once __DIR__ . '/includes/auth.php';
 
+/**
+ * Ensure the market_reports table exists before we attempt to insert data.
+ */
+function market_reports_ensure_table(PDO $pdo): void
+{
+  $pdo->exec(
+    'CREATE TABLE IF NOT EXISTS market_reports (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      heading VARCHAR(255) NOT NULL,
+      subheading VARCHAR(255) NOT NULL,
+      short_description TEXT NOT NULL,
+      long_description LONGTEXT NOT NULL,
+      mockup_heading VARCHAR(255) NOT NULL,
+      mockup_description TEXT NOT NULL,
+      report_image_path VARCHAR(255) DEFAULT NULL,
+      report_pdf_path VARCHAR(255) DEFAULT NULL,
+      report_mockup_path VARCHAR(255) DEFAULT NULL,
+      form_banner_path VARCHAR(255) DEFAULT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+  );
+}
+
+/**
+ * Handle storing an uploaded file for the market report form.
+ *
+ * @return array{0: ?string, 1: ?string} The stored relative path and any error message.
+ */
+function market_reports_store_upload(?array $file, array $allowedMimeTypes, string $label, string $subDirectory = ''): array
+{
+  if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+    return [null, null];
+  }
+
+  if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+    return [null, sprintf('There was a problem uploading the %s. Please try again.', $label)];
+  }
+
+  $tmpName = (string)($file['tmp_name'] ?? '');
+  if ($tmpName === '' || !is_uploaded_file($tmpName)) {
+    return [null, sprintf('Invalid upload received for the %s.', $label)];
+  }
+
+  $finfo = finfo_open(FILEINFO_MIME_TYPE);
+  $mime = $finfo ? finfo_file($finfo, $tmpName) : null;
+  if ($finfo) {
+    finfo_close($finfo);
+  }
+
+  if (!isset($allowedMimeTypes[$mime ?? ''])) {
+    $extensions = array_unique(array_map(static fn(string $ext): string => strtoupper($ext), array_values($allowedMimeTypes)));
+    $extensionList = implode(', ', $extensions);
+    return [
+      null,
+      sprintf('Only %s files are allowed for the %s.', $extensionList !== '' ? $extensionList : 'the specified', $label),
+    ];
+  }
+
+  $baseRelativeDir = 'assets/uploads/market_reports';
+  $subDirectory = trim($subDirectory, '/');
+  $relativeDir = $baseRelativeDir . ($subDirectory !== '' ? '/' . $subDirectory : '');
+  $absoluteDir = __DIR__ . '/' . $relativeDir;
+
+  if (!is_dir($absoluteDir) && !mkdir($absoluteDir, 0755, true) && !is_dir($absoluteDir)) {
+    return [null, 'Unable to prepare the upload directory.'];
+  }
+
+  try {
+    $fileName = bin2hex(random_bytes(8));
+  } catch (Throwable $e) {
+    error_log('Failed to generate market report upload filename: ' . $e->getMessage());
+    return [null, sprintf('Unable to process the %s. Please try again.', $label)];
+  }
+
+  $extension = $allowedMimeTypes[$mime ?? ''];
+  $relativePath = $relativeDir . '/' . $fileName . '.' . $extension;
+  $absolutePath = __DIR__ . '/' . $relativePath;
+
+  if (!move_uploaded_file($tmpName, $absolutePath)) {
+    error_log(sprintf('Failed to move uploaded %s to %s', $label, $absolutePath));
+    return [null, sprintf('Failed to save the uploaded %s. Please try again.', $label)];
+  }
+
+  return [$relativePath, null];
+}
+
 process_logout();
 
 if (!is_authenticated()) {
@@ -15,6 +101,23 @@ if (!is_authenticated()) {
 
 $errors = [];
 $success = null;
+$shouldResetForm = false;
+
+$pdo = null;
+$storageError = null;
+
+try {
+  $pdo = db();
+  market_reports_ensure_table($pdo);
+} catch (Throwable $e) {
+  error_log('Failed to prepare market_reports table: ' . $e->getMessage());
+  $storageError = 'Unable to prepare the market reports storage. Please try again later.';
+  $pdo = null;
+}
+
+if ($storageError !== null) {
+  $errors[] = $storageError;
+}
 
 $heading = '';
 $subheading = '';
@@ -25,6 +128,8 @@ $mockupDescription = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check($_POST['csrf'] ?? '');
+
+  rl_hit('save-market-report', 25);
 
   $heading = trim((string)($_POST['heading'] ?? ''));
   $subheading = trim((string)($_POST['subheading'] ?? ''));
@@ -57,8 +162,126 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors[] = 'Mockup description is required.';
   }
 
-  if (!$errors) {
-    $success = 'Market report details captured successfully. File upload handling can be implemented to persist the report.';
+  $reportImagePath = null;
+  $reportPdfPath = null;
+  $reportMockupPath = null;
+  $formBannerPath = null;
+
+  if (!$errors && $storageError === null && $pdo instanceof PDO) {
+    [$reportImagePath, $uploadError] = market_reports_store_upload(
+      $_FILES['report_image'] ?? null,
+      [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif',
+        'image/webp' => 'webp',
+      ],
+      'Report Image',
+      'images'
+    );
+    if ($uploadError) {
+      $errors[] = $uploadError;
+    }
+
+    [$reportPdfPath, $pdfError] = market_reports_store_upload(
+      $_FILES['report_pdf'] ?? null,
+      [
+        'application/pdf' => 'pdf',
+      ],
+      'Report PDF',
+      'documents'
+    );
+    if ($pdfError) {
+      $errors[] = $pdfError;
+    }
+
+    [$reportMockupPath, $mockupUploadError] = market_reports_store_upload(
+      $_FILES['report_mockup'] ?? null,
+      [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif',
+        'image/webp' => 'webp',
+      ],
+      'Report Mockup',
+      'mockups'
+    );
+    if ($mockupUploadError) {
+      $errors[] = $mockupUploadError;
+    }
+
+    [$formBannerPath, $bannerUploadError] = market_reports_store_upload(
+      $_FILES['form_banner'] ?? null,
+      [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif',
+        'image/webp' => 'webp',
+      ],
+      'Form Banner',
+      'banners'
+    );
+    if ($bannerUploadError) {
+      $errors[] = $bannerUploadError;
+    }
+  }
+
+  if (!$errors && $storageError === null && $pdo instanceof PDO) {
+    try {
+      $stmt = $pdo->prepare(
+        'INSERT INTO market_reports (
+            heading,
+            subheading,
+            short_description,
+            long_description,
+            mockup_heading,
+            mockup_description,
+            report_image_path,
+            report_pdf_path,
+            report_mockup_path,
+            form_banner_path,
+            created_at
+          ) VALUES (
+            :heading,
+            :subheading,
+            :short_description,
+            :long_description,
+            :mockup_heading,
+            :mockup_description,
+            :report_image_path,
+            :report_pdf_path,
+            :report_mockup_path,
+            :form_banner_path,
+            NOW()
+          )'
+      );
+
+      $stmt->execute([
+        ':heading'            => $heading,
+        ':subheading'         => $subheading,
+        ':short_description'  => $shortDescription,
+        ':long_description'   => $longDescription,
+        ':mockup_heading'     => $mockupHeading,
+        ':mockup_description' => $mockupDescription,
+        ':report_image_path'  => $reportImagePath,
+        ':report_pdf_path'    => $reportPdfPath,
+        ':report_mockup_path' => $reportMockupPath,
+        ':form_banner_path'   => $formBannerPath,
+      ]);
+
+      $success = 'Your Market Report Data has been submitted Successfully.';
+      $shouldResetForm = true;
+
+      $heading = '';
+      $subheading = '';
+      $shortDescription = '';
+      $longDescription = '';
+      $mockupHeading = '';
+      $mockupDescription = '';
+    } catch (Throwable $e) {
+      error_log('Failed to save market report: ' . $e->getMessage());
+      $errors[] = 'An unexpected error occurred while saving the market report. Please try again.';
+    }
   }
 }
 
@@ -77,7 +300,7 @@ render_sidebar('market-reports');
   </div>
 
   <?php if ($success): ?>
-    <div class="alert alert-success" role="alert">
+    <div class="alert alert-success" role="alert" data-auto-dismiss="5000">
       <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
     </div>
   <?php endif; ?>
@@ -97,7 +320,14 @@ render_sidebar('market-reports');
       <h3 class="h5 mb-0">Add Market Report Form</h3>
     </div>
     <div class="card-body">
-      <form id="market-report-form" class="row g-3" method="post" enctype="multipart/form-data" novalidate>
+      <form
+        id="market-report-form"
+        class="row g-3"
+        method="post"
+        enctype="multipart/form-data"
+        novalidate
+        data-reset-on-load="<?= $shouldResetForm ? '1' : '0' ?>"
+      >
         <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
 
         <div class="col-12">
@@ -204,12 +434,27 @@ render_sidebar('market-reports');
   <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@39.0.1/build/ckeditor.js"></script>
   <script>
     (() => {
+      const form = document.getElementById('market-report-form');
+
+      document.querySelectorAll('.alert[data-auto-dismiss]').forEach((alertEl) => {
+        const delay = parseInt(alertEl.dataset.autoDismiss ?? '', 10);
+        if (delay > 0) {
+          setTimeout(() => {
+            alertEl.classList.add('d-none');
+          }, delay);
+        }
+      });
+
+      const shouldResetForm = form && form.dataset.resetOnLoad === '1';
+
       if (!window.ClassicEditor) {
+        if (shouldResetForm && form) {
+          form.reset();
+        }
         return;
       }
 
       const editors = [];
-      const form = document.getElementById('market-report-form');
 
       const syncEditorData = () => {
         editors.forEach(({ editor, textarea }) => {
@@ -228,6 +473,10 @@ render_sidebar('market-reports');
       if (form) {
         form.addEventListener('submit', syncEditorData);
         form.addEventListener('reset', resetEditors);
+
+        if (shouldResetForm) {
+          form.reset();
+        }
       }
 
       document.querySelectorAll('.rich-text-editor').forEach((textarea) => {
