@@ -3203,6 +3203,27 @@ INSERT INTO `page_access_logs` (`id`, `ip_address`, `user_agent`, `referer`, `re
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `market_reports`
+--
+
+CREATE TABLE `market_reports` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `heading` varchar(255) NOT NULL,
+  `subheading` varchar(255) NOT NULL,
+  `short_description` text NOT NULL,
+  `long_description` longtext NOT NULL,
+  `mockup_heading` varchar(255) NOT NULL,
+  `mockup_description` text NOT NULL,
+  `report_image_path` varchar(255) DEFAULT NULL,
+  `report_pdf_path` varchar(255) DEFAULT NULL,
+  `report_mockup_path` varchar(255) DEFAULT NULL,
+  `form_banner_path` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `popup_enquiry`
 --
 
@@ -3266,6 +3287,12 @@ ALTER TABLE `page_access_logs`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `market_reports`
+--
+ALTER TABLE `market_reports`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `popup_enquiry`
 --
 ALTER TABLE `popup_enquiry`
@@ -3305,6 +3332,12 @@ ALTER TABLE `enquiries`
 --
 ALTER TABLE `page_access_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3048;
+
+--
+-- AUTO_INCREMENT for table `market_reports`
+--
+ALTER TABLE `market_reports`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `popup_enquiry`
