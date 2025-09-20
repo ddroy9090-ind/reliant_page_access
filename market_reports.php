@@ -121,7 +121,7 @@ render_sidebar('market-reports');
         <div class="col-12">
           <label class="form-label" for="short_description">Short description</label>
           <textarea
-            class="form-control"
+            class="form-control rich-text-editor"
             id="short_description"
             name="short_description"
             rows="4"
@@ -157,7 +157,7 @@ render_sidebar('market-reports');
         <div class="col-12">
           <label class="form-label" for="mockup_description">Mockup Description</label>
           <textarea
-            class="form-control"
+            class="form-control rich-text-editor"
             id="mockup_description"
             name="mockup_description"
             rows="4"
@@ -183,6 +183,35 @@ render_sidebar('market-reports');
       </form>
     </div>
   </div>
+  <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+  <script>
+    (() => {
+      if (!window.CKEDITOR) {
+        return;
+      }
+
+      const defaultConfig = {
+        height: 240,
+        removeButtons: 'Source',
+        toolbar: [
+          { name: 'clipboard', items: ['Undo', 'Redo'] },
+          { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
+          { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
+          { name: 'links', items: ['Link', 'Unlink'] },
+          { name: 'insert', items: ['Table', 'HorizontalRule'] },
+          { name: 'styles', items: ['Format'] },
+          { name: 'document', items: ['Maximize'] }
+        ]
+      };
+
+      document.querySelectorAll('.rich-text-editor').forEach((textarea) => {
+        if (!textarea.id) {
+          return;
+        }
+        CKEDITOR.replace(textarea.id, defaultConfig);
+      });
+    })();
+  </script>
 </main>
 
 <?php
