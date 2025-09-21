@@ -115,6 +115,29 @@ table td {
     text-overflow: ellipsis;
 }
 
+.table-tooltip-popup {
+    position: fixed;
+    z-index: 1080;
+    max-width: min(480px, calc(100vw - 32px));
+    background: rgba(17, 17, 17, 0.95);
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translate(-9999px, -9999px);
+    transition: opacity 0.15s ease-in-out;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.table-tooltip-popup.is-visible {
+    opacity: 1;
+}
+
 .active>.page-link,
 .page-link.active {
     background-color: #d01f28;
