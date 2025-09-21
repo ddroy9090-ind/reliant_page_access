@@ -39,6 +39,7 @@ function render_sidebar(string $active): void
     'contact-form' => ['href' => 'contact_form_submissions.php', 'icon' => 'bi-person-rolodex', 'label' => 'Contact Submissions'],
     'popup-form' => ['href' => 'popup_form_submissions.php', 'icon' => 'bi-database', 'label' => 'Popup Submissions'],
     'add-blogs' => ['href' => 'add_blogs.php', 'icon' => 'bi-journal-plus', 'label' => 'Add Blogs'],
+    'add-job-vacancy' => ['href' => 'add_job_vacancy.php', 'icon' => 'bi-briefcase', 'label' => 'Add Job Vacancy'],
     'all-blogs' => ['href' => 'all_blogs.php', 'icon' => 'bi-journal-text', 'label' => 'All Blogs'],
     'market-reports' => ['href' => 'market_reports.php', 'icon' => 'bi-bar-chart', 'label' => 'Market Reports'],
     'market-report-leads' => ['href' => 'market_reports_leads.php', 'icon' => 'bi-people', 'label' => 'Market Reports Leads'],
