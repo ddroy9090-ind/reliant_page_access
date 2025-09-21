@@ -27,6 +27,47 @@ $totalPages = 0;
 $leads = [];
 $error = null;
 
+$operationSuccess = $_SESSION['market_reports_success'] ?? null;
+unset($_SESSION['market_reports_success']);
+$operationError = $_SESSION['market_reports_error'] ?? null;
+unset($_SESSION['market_reports_error']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  csrf_check($_POST['csrf'] ?? '');
+  $action = (string)($_POST['action'] ?? '');
+
+  if ($action === 'delete') {
+    rl_hit('delete-market-report-lead', 20);
+    $leadId = (int)($_POST['lead_id'] ?? 0);
+
+    if ($leadId <= 0) {
+      $_SESSION['market_reports_error'] = 'Invalid lead selected for deletion.';
+    } else {
+      try {
+        $stmt = $pdo->prepare('SELECT id FROM reports_form_data WHERE id = :id');
+        $stmt->execute([':id' => $leadId]);
+        $lead = $stmt->fetch();
+
+        if (!$lead) {
+          $_SESSION['market_reports_error'] = 'The selected lead could not be found.';
+        } else {
+          $deleteStmt = $pdo->prepare('DELETE FROM reports_form_data WHERE id = :id');
+          $deleteStmt->execute([':id' => $leadId]);
+          $_SESSION['market_reports_success'] = 'Lead deleted successfully.';
+        }
+      } catch (Throwable $e) {
+        error_log('Failed to delete market report lead: ' . $e->getMessage());
+        $_SESSION['market_reports_error'] = 'An unexpected error occurred while deleting the lead.';
+      }
+    }
+  } else {
+    $_SESSION['market_reports_error'] = 'Unsupported action requested.';
+  }
+
+  header('Location: market_reports_leads.php');
+  exit;
+}
+
 try {
   $countStmt = $pdo->query('SELECT COUNT(*) FROM reports_form_data');
   $totalRecords = (int)$countStmt->fetchColumn();
@@ -80,6 +121,20 @@ render_sidebar('market-report-leads');
     </div>
   </div>
 
+  <?php if ($operationSuccess): ?>
+    <div class="alert alert-success alert-dismissible fade show market-report-alert" role="alert">
+      <?= htmlspecialchars($operationSuccess, ENT_QUOTES, 'UTF-8') ?>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($operationError): ?>
+    <div class="alert alert-danger alert-dismissible fade show market-report-alert" role="alert">
+      <?= htmlspecialchars($operationError, ENT_QUOTES, 'UTF-8') ?>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <?php endif; ?>
+
   <?php if ($error): ?>
     <div class="alert alert-warning" role="alert">
       <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
@@ -100,6 +155,7 @@ render_sidebar('market-report-leads');
               <th scope="col">Phone</th>
               <th scope="col">Company</th>
               <th scope="col">Category</th>
+              <th scope="col" class="text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -119,6 +175,16 @@ render_sidebar('market-report-leads');
                 <td><?= htmlspecialchars((string)($lead['phone'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                 <td><?= htmlspecialchars((string)($lead['company'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                 <td><?= htmlspecialchars((string)($lead['category'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+                <td class="text-end text-nowrap">
+                  <button type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    title="Delete lead"
+                    data-delete-market-lead="1"
+                    data-lead-id="<?= htmlspecialchars((string)$lead['id'], ENT_QUOTES, 'UTF-8') ?>"
+                    data-lead-name="<?= htmlspecialchars((string)($lead['full_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
               </tr>
             <?php endforeach; ?>
           </tbody>
@@ -156,6 +222,50 @@ render_sidebar('market-report-leads');
     </div>
   <?php endif; ?>
 </main>
+<form method="post" class="d-none" id="delete-lead-form">
+  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+  <input type="hidden" name="action" value="delete">
+  <input type="hidden" name="lead_id" id="delete-lead-id" value="">
+</form>
+<script>
+  (function() {
+    const deleteForm = document.getElementById('delete-lead-form');
+    const deleteIdInput = document.getElementById('delete-lead-id');
+
+    document.querySelectorAll('[data-delete-market-lead="1"]').forEach(button => {
+      button.addEventListener('click', () => {
+        if (!deleteForm || !deleteIdInput) {
+          return;
+        }
+
+        const leadId = parseInt(button.getAttribute('data-lead-id') || '', 10);
+        if (!leadId) {
+          return;
+        }
+
+        const leadName = button.getAttribute('data-lead-name') || '';
+        const label = leadName ? `"${leadName}"` : 'this lead';
+        const confirmDelete = window.confirm(`Are you sure you want to delete ${label}? This action cannot be undone.`);
+        if (!confirmDelete) {
+          return;
+        }
+
+        deleteIdInput.value = String(leadId);
+        deleteForm.submit();
+      });
+    });
+
+    const alerts = document.querySelectorAll('.market-report-alert');
+    if (alerts.length > 0) {
+      window.setTimeout(() => {
+        alerts.forEach(alert => {
+          alert.classList.remove('show');
+          alert.classList.add('d-none');
+        });
+      }, 5000);
+    }
+  })();
+</script>
 <?php
 echo '</div>';
 echo '</div>';
