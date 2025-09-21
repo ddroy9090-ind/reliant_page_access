@@ -91,6 +91,7 @@ function render_footer(bool $includeECharts = false, bool $includeChartJs = fals
 
 
 
+  echo "\n<script src=\"assets/js/table-tooltips.js\"></script>";
   echo '</body></html>';
 }
 
