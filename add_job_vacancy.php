@@ -223,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':job_description'    => $jobDescription,
       ]);
 
-      $success = 'Job vacancy created successfully.';
+      $success = 'Your Vacancy Has been added Successfully.';
       $bannerDescription = $jobPostedDate = $jobTitle = $jobId = $vacancy = $education = $location = $jobDescription = '';
       $gender = '';
       $uploadedBannerPath = '';
@@ -269,13 +269,13 @@ render_sidebar('add-job-vacancy');
   <?php endif; ?>
 
   <?php if ($success): ?>
-    <div class="alert alert-success" role="alert">
+    <div class="alert alert-success fade show" role="alert" id="job-vacancy-success">
       <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
     </div>
   <?php endif; ?>
 
   <div class="box">
-    <form id="add-job-vacancy-form" method="post" enctype="multipart/form-data" class="row g-4" novalidate>
+    <form id="add-job-vacancy-form" method="post" enctype="multipart/form-data" class="row g-4" novalidate data-success="<?= $success ? '1' : '0' ?>">
       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
       <div class="col-12">
         <label for="career_banner" class="form-label">Upload Career Banner</label>
@@ -343,19 +343,38 @@ echo '</div>';
 <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@39.0.1/build/ckeditor.js"></script>
 <script>
   (function() {
+    const form = document.getElementById('add-job-vacancy-form');
     const textarea = document.getElementById('job_description');
+    const successAlert = document.getElementById('job-vacancy-success');
+
+    if (successAlert) {
+      setTimeout(() => {
+        successAlert.classList.remove('show');
+        successAlert.addEventListener('transitionend', () => {
+          successAlert.remove();
+        }, { once: true });
+      }, 5000);
+    }
+
     if (!textarea) {
+      if (form && form.dataset.success === '1') {
+        form.reset();
+      }
       return;
     }
 
     ClassicEditor
       .create(textarea)
       .then(editor => {
-        const form = document.getElementById('add-job-vacancy-form');
         if (form) {
           form.addEventListener('submit', () => {
             textarea.value = editor.getData();
           });
+
+          if (form.dataset.success === '1') {
+            form.reset();
+            editor.setData('');
+          }
         }
       })
       .catch(error => {
