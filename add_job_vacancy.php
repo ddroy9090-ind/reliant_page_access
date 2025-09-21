@@ -21,6 +21,8 @@ function job_vacancy_ensure_table(PDO $pdo): void
       banner_path VARCHAR(255) NOT NULL,
       banner_description TEXT NOT NULL,
       job_posted_date DATE NOT NULL,
+      job_title VARCHAR(255) NOT NULL,
+      job_id VARCHAR(100) NOT NULL,
       vacancy VARCHAR(255) NOT NULL,
       education VARCHAR(255) NOT NULL,
       gender VARCHAR(20) NOT NULL,
@@ -38,6 +40,8 @@ $success = null;
 
 $bannerDescription = '';
 $jobPostedDate = '';
+$jobTitle = '';
+$jobId = '';
 $vacancy = '';
 $education = '';
 $gender = '';
@@ -47,6 +51,15 @@ $uploadedBannerPath = '';
 
 try {
   job_vacancy_ensure_table($pdo);
+  $columnCheck = $pdo->query("SHOW COLUMNS FROM job_vacancies LIKE 'job_title'");
+  if ($columnCheck && $columnCheck->fetchColumn() === false) {
+    $pdo->exec("ALTER TABLE job_vacancies ADD COLUMN job_title VARCHAR(255) NOT NULL DEFAULT '' AFTER job_posted_date");
+  }
+
+  $columnCheck = $pdo->query("SHOW COLUMNS FROM job_vacancies LIKE 'job_id'");
+  if ($columnCheck && $columnCheck->fetchColumn() === false) {
+    $pdo->exec("ALTER TABLE job_vacancies ADD COLUMN job_id VARCHAR(100) NOT NULL DEFAULT '' AFTER job_title");
+  }
 } catch (Throwable $tableError) {
   error_log('Failed to ensure job_vacancies table exists: ' . $tableError->getMessage());
   $errors[] = 'Unable to prepare the job vacancy storage. Please try again later.';
@@ -61,6 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $bannerDescription = trim((string)($_POST['banner_description'] ?? ''));
     $jobPostedDate = trim((string)($_POST['job_posted_date'] ?? ''));
+    $jobTitle = trim((string)($_POST['job_title'] ?? ''));
+    $jobId = trim((string)($_POST['job_id'] ?? ''));
     $vacancy = trim((string)($_POST['vacancy'] ?? ''));
     $education = trim((string)($_POST['education'] ?? ''));
     $gender = strtolower(trim((string)($_POST['gender'] ?? '')));
@@ -80,6 +95,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       } else {
         $jobPostedDate = $date->format('Y-m-d');
       }
+    }
+
+    if ($jobTitle === '') {
+      $errors[] = 'Job Title is required.';
+    }
+
+    if ($jobId === '') {
+      $errors[] = 'Job ID is required.';
     }
 
     if ($vacancy === '') {
@@ -164,6 +187,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             banner_path,
             banner_description,
             job_posted_date,
+            job_title,
+            job_id,
             vacancy,
             education,
             gender,
@@ -174,6 +199,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             :banner_path,
             :banner_description,
             :job_posted_date,
+            :job_title,
+            :job_id,
             :vacancy,
             :education,
             :gender,
@@ -187,6 +214,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':banner_path'        => $uploadedBannerPath,
         ':banner_description' => $bannerDescription,
         ':job_posted_date'    => $jobPostedDate,
+        ':job_title'          => $jobTitle,
+        ':job_id'             => $jobId,
         ':vacancy'            => $vacancy,
         ':education'          => $education,
         ':gender'             => $storedGender,
@@ -195,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       ]);
 
       $success = 'Job vacancy created successfully.';
-      $bannerDescription = $jobPostedDate = $vacancy = $education = $location = $jobDescription = '';
+      $bannerDescription = $jobPostedDate = $jobTitle = $jobId = $vacancy = $education = $location = $jobDescription = '';
       $gender = '';
       $uploadedBannerPath = '';
     } elseif ($newBannerAbsolutePath && is_file($newBannerAbsolutePath)) {
@@ -260,6 +289,14 @@ render_sidebar('add-job-vacancy');
       <div class="col-12 col-md-6">
         <label for="job_posted_date" class="form-label">Job Posted Date</label>
         <input type="date" class="form-control" id="job_posted_date" name="job_posted_date" value="<?= htmlspecialchars($jobPostedDate, ENT_QUOTES, 'UTF-8') ?>" required>
+      </div>
+      <div class="col-12 col-md-6">
+        <label for="job_title" class="form-label">Job Title</label>
+        <input type="text" class="form-control" id="job_title" name="job_title" value="<?= htmlspecialchars($jobTitle, ENT_QUOTES, 'UTF-8') ?>" placeholder="e.g., Senior Analyst" required>
+      </div>
+      <div class="col-12 col-md-6">
+        <label for="job_id" class="form-label">Job ID</label>
+        <input type="text" class="form-control" id="job_id" name="job_id" value="<?= htmlspecialchars($jobId, ENT_QUOTES, 'UTF-8') ?>" placeholder="e.g., JOB-2024-001" required>
       </div>
       <div class="col-12 col-md-6">
         <label for="vacancy" class="form-label">Vacancy</label>
