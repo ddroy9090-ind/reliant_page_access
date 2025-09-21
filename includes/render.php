@@ -41,6 +41,7 @@ function render_sidebar(string $active): void
     'add-blogs' => ['href' => 'add_blogs.php', 'icon' => 'bi-journal-plus', 'label' => 'Add Blogs'],
     'all-blogs' => ['href' => 'all_blogs.php', 'icon' => 'bi-journal-text', 'label' => 'All Blogs'],
     'market-reports' => ['href' => 'market_reports.php', 'icon' => 'bi-bar-chart', 'label' => 'Market Reports'],
+    'market-report-leads' => ['href' => 'market_reports_leads.php', 'icon' => 'bi-people', 'label' => 'Market Reports Leads'],
   ];
 
   echo '<aside class="col-12 col-md-3 col-lg-2 sidebar p-3">';
